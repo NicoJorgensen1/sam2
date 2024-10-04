@@ -1,0 +1,7 @@
+# Ignore the Training_Runs subdirectories inside the Docker container 
+Training_Runs/*
+
+# Ignore the checkpoints
+*.ckpt
+*/*.ckpt
+*.ckpt*

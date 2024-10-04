@@ -54,6 +54,11 @@ from strawberry import relay
 from strawberry.file_uploads import Upload
 
 
+import logging
+import subprocess
+logger = logging.getLogger(__name__)
+
+
 @strawberry.type
 class Query:
 
@@ -291,65 +296,105 @@ def process_video(
     """
     Process file upload including video trimming and content moderation checks.
 
-    Returns the filepath, s3_file_key, hash & video metaedata as a tuple.
+    Returns the filepath, s3_file_key, hash & video metadata as a tuple.
     """
-    with tempfile.TemporaryDirectory() as tempdir:
-        in_path = f"{tempdir}/in.mp4"
-        out_path = f"{tempdir}/out.mp4"
-        with open(in_path, "wb") as in_f:
-            in_f.write(file.read())
+    try:
+        logger.info(f"Starting video processing for file: {file.filename}")
 
-        try:
-            video_metadata = get_video_metadata(in_path)
-        except av.InvalidDataError:
-            raise Exception("not valid video file")
+        with tempfile.TemporaryDirectory() as tempdir:
+            in_path = f"{tempdir}/in.mp4"
+            out_path = f"{tempdir}/out.mp4"
+            
+            # Save uploaded video to temp location
+            with open(in_path, "wb") as in_f:
+                logger.info(f"Writing file to temporary path: {in_path}")
+                in_f.write(file.read())
 
-        if video_metadata.num_video_streams == 0:
-            raise Exception("video container does not contain a video stream")
-        if video_metadata.width is None or video_metadata.height is None:
-            raise Exception("video container does not contain width or height metadata")
+            try:
+                # Extract metadata from the video
+                video_metadata = get_video_metadata(in_path)
+                logger.info(f"Video metadata extracted: {video_metadata}")
+            except av.InvalidDataError as e:
+                logger.error(f"Invalid video file: {e}")
+                raise Exception("not valid video file") from e
 
-        if video_metadata.duration_sec in (None, 0):
-            raise Exception("video container does time duration metadata")
+            if video_metadata.num_video_streams == 0:
+                raise Exception("Video container does not contain a video stream")
+            if video_metadata.width is None or video_metadata.height is None:
+                raise Exception("Video container does not contain width or height metadata")
 
-        start_time_sec, duration_time_sec = _get_start_sec_duration_sec(
-            max_time=max_time,
-            start_time_sec=start_time_sec,
-            duration_time_sec=duration_time_sec,
-        )
+            if video_metadata.duration_sec in (None, 0):
+                raise Exception("Video container does not contain duration metadata")
 
-        # Transcode video to make sure videos returned to the app are all in
-        # the same format, duration, resolution, fps.
-        transcode(
-            in_path,
-            out_path,
-            video_metadata,
-            seek_t=start_time_sec,
-            duration_time_sec=duration_time_sec,
-        )
-
-        os.remove(in_path)  # don't need original video now
-
-        out_video_metadata = get_video_metadata(out_path)
-        if out_video_metadata.num_video_frames == 0:
-            raise Exception(
-                "transcode produced empty video; check seek time or your input video"
+            # Adjust start time and duration based on the max allowed time
+            start_time_sec, duration_time_sec = _get_start_sec_duration_sec(
+                max_time=max_time,
+                start_time_sec=start_time_sec,
+                duration_time_sec=duration_time_sec,
             )
+            logger.info(f"Using start_time_sec: {start_time_sec}, duration_time_sec: {duration_time_sec}")
 
-        filepath = None
-        file_key = None
-        with open(out_path, "rb") as file_data:
-            file_hash = get_file_hash(file_data)
-            file_data.seek(0)
+            # Transcode the video to standardize format, resolution, fps, etc.
+            logger.info(f"Transcoding video from {in_path} to {out_path}")
+            logger.info(f"Original video metadata: duration={video_metadata.duration_sec}, "
+                        f"width={video_metadata.width}, height={video_metadata.height}, "
+                        f"num_video_streams={video_metadata.num_video_streams}")
+            try:
+                transcode(
+                    in_path,
+                    out_path,
+                    video_metadata,
+                    seek_t=start_time_sec,
+                    duration_time_sec=duration_time_sec,
+                )
+                logger.info(f"Transcoding completed successfully")
+            except subprocess.CalledProcessError as e:
+                logger.error(f"FFmpeg process failed during transcoding: {e}")
+                raise
+            except Exception as e:
+                logger.error(f"Error during transcoding: {e}")
+                raise
+            # Remove the input file after transcoding
+            os.remove(in_path)
+            logger.info(f"Removed original file: {in_path}")
 
-            file_key = UPLOADS_PREFIX + "/" + f"{file_hash}.mp4"
-            filepath = os.path.join(UPLOADS_PATH, f"{file_hash}.mp4")
+            # Extract metadata from the transcoded video
+            out_video_metadata = get_video_metadata(out_path)
+            logger.info(f"Transcoded video metadata: {out_video_metadata}")
+            logger.info(f"Transcoded video metadata: duration={out_video_metadata.duration_sec}, "
+                        f"width={out_video_metadata.width}, height={out_video_metadata.height}, "
+                        f"num_video_frames={out_video_metadata.num_video_frames}")
+            if out_video_metadata.num_video_frames == 0:
+                raise Exception(
+                    "Transcode produced empty video; check seek time or input video"
+                )
 
-        assert filepath is not None and file_key is not None
-        shutil.move(out_path, filepath)
+            filepath = None
+            file_key = None
 
-        return filepath, file_key, out_video_metadata
+            # Generate file hash and move the transcoded file to the upload directory
+            with open(out_path, "rb") as file_data:
+                logger.info("Generating file hash")
+                file_hash = get_file_hash(file_data)
+                file_data.seek(0)
 
+                file_key = UPLOADS_PREFIX + "/" + f"{file_hash}.mp4"
+                filepath = os.path.join(UPLOADS_PATH, f"{file_hash}.mp4")
+
+            assert filepath is not None and file_key is not None
+            try:
+                shutil.move(out_path, filepath)
+                logger.info(f"Moved transcoded file to: {filepath}")
+            except Exception as e:
+                logger.error(f"Failed to move file from {out_path} to {filepath}: {e}")
+                raise
+            logger.info(f"Moved transcoded file to: {filepath}")
+
+            return filepath, file_key, out_video_metadata
+
+    except Exception as e:
+        logger.error(f"Error during video processing: {e}")
+        raise
 
 schema = strawberry.Schema(
     query=Query,
