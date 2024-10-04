@@ -1,0 +1,69 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.234.0/containers/docker-existing-dockerfile
+{
+    "name": "SAM2_devcontainer",
+
+    // Sets the run context .
+    "context": "..",
+
+    // // Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+    "dockerFile": "Dockerfile",
+    // Add a volume to the docker container that can be reached from within the container when running through vscode 
+    // I have no idea what the bind type or the consistency means. But spaces are NOT allowed between the keywords 
+    // The username is also specified in the Dockerfile. If changed, make sure it is changed both places!
+    // By using this localEnv it is possible to use the same path on both the local computer and the server, just remember to add export IMAGE_DATASET=/path/to/dataset in the corresponding ~/.bashrc file!
+     "mounts": [
+       "source=${localEnv:IMAGE_DATASETS},target=/Image_Datasets,type=bind,consistency=cached",        // Mount the image datasets
+       "source=/home/${localEnv:USER}/.aws,target=/workspace/.aws,type=bind,consistency=cached",       // Mount the aws credentials
+       "source=/home/${localEnv:USER}/.ssh,target=/workspace/.ssh,type=bind,consistency=cached"        // Mount the ssh credentials
+     ],
+    
+    // Add the IDs of extensions you want installed when the container is created.
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",                                 // Python extension
+                "ms-azuretools.vscode-docker",                      // Docker extension
+                "yy0931.save-as-root",                              // Capability of "save as root", which might be usefull when editing source code for debugging purposes
+                "ms-vscode.cpptools-extension-pack",                // C++ extension, used for onnx conversion 
+                "eamodio.gitlens",                                  // GitLens extension ID used for GitLens, which is git on steroids 
+                "GitHub.copilot",                                   // The github copilot extension 
+                "amazonwebservices.aws-toolkit-vscode",             // AWS toolkit for vscode 
+                "sourcery.sourcery",                                // Sourcery extension
+                "ms-python.autopep8"                                // Autopep8 extension --> automatically formats python code to PEP8 format on_save 
+            ],
+            "settings": [
+                "terminal.integrated.shell.linux", "/bin/bash"      // Let bash be the default shell inside the container 
+            ]
+        }
+    },
+    
+    // The arguments to initiate the container with.
+    "runArgs": [
+        "-v", "/tmp/.X11-unix:/tmp/.X11-unix", "-e", "DISPLAY",     // Mount the display in the container (i.e. enable usage of the screen monitors from inside the container) 
+        "--privileged",                                             // This is necessary in order for the container to be able to reach the inserted USB accelerator 
+        "-v", "/dev/bus/usb:/dev/bus/usb",                          // Providing access to the usb interface 
+        "--network", "host",                                        // Use the same network as the host 
+        "--gpus", "all",                                            // Use all available GPUs
+        "--shm-size", "6224G",                                      // Increase the shared memory size to 1T 
+        "--ulimit", "memlock=-1",                                   // Remove the memory lock limit 
+        "--ulimit", "stack=1073741824",                             // Increase the stack size to 1024 MB 
+        "--memory", "6224G",                                        // Allocates 1T of memory to your container
+        "--memory-swap", "6284G"                                    // As the swap includes both the memory+swap, here we add an additional 40G for the swap memory 
+    ],
+
+    
+    // Assure we will always start in the /workspace/SAM2 directory 
+    "workspaceMount": "source=${localWorkspaceFolder}/,target=/workspace/SAM2,type=bind,consistency=cached",
+    "workspaceFolder": "/workspace/SAM2",
+
+    // Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "EnvisionUser",
+    "remoteEnv": {
+        "IMAGE_DATASETS": "/Image_Datasets",
+        "WANDB_API_KEY": "e7220eb15a89a255ac255d759c7089d1d1b88577",
+        "PYTHONPATH": "${PYTHONPATH}:/workspace/SAM2",
+        "AWS_CONFIG_FILE": "/workspace/.aws/config",
+        "AWS_SHARED_CREDENTIALS_FILE": "/workspace/.aws/credentials"
+    } 
+}

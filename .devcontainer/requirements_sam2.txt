@@ -1,0 +1,7 @@
+polars>=1.0.0
+opencv-python
+torchinfo
+numpy
+wandb
+timm
+matplotlib
