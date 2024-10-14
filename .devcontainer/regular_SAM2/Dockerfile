@@ -78,11 +78,11 @@ RUN sudo apt-get install bash-completion && sudo apt-get install --reinstall bas
 FROM user_cacher AS python_package_installer
 
 ### Copy all requirements.txt files into the container 
-COPY .devcontainer/requirements_sam2.txt .devcontainer/requirements_sam2.txt
+COPY .devcontainer/regular_SAM2/requirements_sam2.txt requirements.txt
 
 ### Install python requirements 
 RUN python -m pip install pip -U
-RUN python -m pip install -r .devcontainer/requirements_sam2.txt 
+RUN python -m pip install -r requirements.txt
 
 
 # Install GIC shared library - which includes all standard functions 
