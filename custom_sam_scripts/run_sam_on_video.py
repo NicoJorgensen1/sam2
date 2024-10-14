@@ -1,18 +1,26 @@
+from CameraAISharedLibrary.print_args_func import print_args
 from AITrainingSharedLibrary.get_relevant_dirs import add_dirs_to_path
 from AITrainingSharedLibrary.images_ensure_list_of_paths_input import get_list_of_single_filepaths
+from AITrainingSharedLibrary.get_relevant_dirs import add_dirs_to_path
 from sam2.build_sam import build_sam2_video_predictor
-from typing import List, Union
+from typing import List, Union, Optional
 from pathlib import Path
+import argparse
 import torch
 
 relevant_dirs = add_dirs_to_path()
 
 
-def sam_video_inference(
-        video_path_list: Union[str, List[str]],
-        model_size: str = "large",
-) -> None:
 
+
+def sam_video_inference(
+        video_path_list: Union[str, Path, List[str], List[Path]],
+        model_size: str = "large",
+        output_dir: Optional[str] = None,
+) -> None:
+    
+    # Get the list of single video filepaths
+    video_path_list = get_list_of_single_filepaths(video_path_list=video_path_list)
 
     checkpoint = "./checkpoints/sam2.1_hiera_large.pt"
     model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
@@ -28,4 +36,24 @@ def sam_video_inference(
 
             # propagate the prompts to get masklets throughout the video
             for frame_idx, object_ids, masks in predictor.propagate_in_video(state):
-                ...
+                pass 
+
+
+
+
+
+### Run from CLI 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--video_path", type=str, default="./data/video.mp4")
+    parser.add_argument("--output_dir", type=str, default="./output")
+    args = parser.parse_args()
+
+    # Edit the input args 
+    args.output_dir = None if "none" in str(args.output_dir).lower() else args.output_dir
+
+    # Print the arguments
+    print_args(args=args, ljust_length=20, init_str="This is the arguments when running SAM2 on a video")
+
+    sam_video_inference(args.video_path, args.output_dir)
+
