@@ -6,4 +6,3 @@ wandb
 timm
 matplotlib
 huggingface_hub
-hydra
