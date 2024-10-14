@@ -23,12 +23,11 @@
         "vscode": {
             "extensions": [
                 "ms-python.python",                                 // Python extension
+                "ms-python.debugpy",                                // Debugpy extension --> allows for debugging python code 
                 "ms-azuretools.vscode-docker",                      // Docker extension
                 "yy0931.save-as-root",                              // Capability of "save as root", which might be usefull when editing source code for debugging purposes
-                "ms-vscode.cpptools-extension-pack",                // C++ extension, used for onnx conversion 
                 "eamodio.gitlens",                                  // GitLens extension ID used for GitLens, which is git on steroids 
                 "GitHub.copilot",                                   // The github copilot extension 
-                "amazonwebservices.aws-toolkit-vscode",             // AWS toolkit for vscode 
                 "sourcery.sourcery",                                // Sourcery extension
                 "ms-python.autopep8"                                // Autopep8 extension --> automatically formats python code to PEP8 format on_save 
             ],
