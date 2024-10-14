@@ -93,8 +93,8 @@ RUN python -m pip install --extra-index-url http://envision:Envision1234@192.168
 
 
 ##########################################################################################################################################################################################
-####################################################### Create the final layer of the image  => Here the container is ready to run #######################################################
-FROM python_package_installer AS runner 
+####################################################### Create the fourth layer of the image  => Here the container is ready to run ######################################################
+FROM python_package_installer AS sam_installer
 ARG WORKING_DIR 
 ARG USERNAME
 
@@ -103,6 +103,19 @@ USER ${USERNAME}
 
 # Set the current working directory 
 WORKDIR ${WORKING_DIR} 
+
+# Install the SAM2 package
+COPY setup.py ${WORKING_DIR} 
+COPY README.md ${WORKING_DIR}
+RUN python -m pip install -e .
+
+
+
+
+##########################################################################################################################################################################################
+####################################################### Create the final layer of the image  => Here the container is ready to run #######################################################
+FROM sam_installer as runner
+ARG WORKING_DIR 
 
 # Copy the current working directory into the working directory here 
 COPY . ${WORKING_DIR} 

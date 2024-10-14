@@ -60,6 +60,7 @@
     "remoteUser": "EnvisionUser",
     "remoteEnv": {
         "IMAGE_DATASETS": "/Image_Datasets",
+        "MODEL_WEIGHTS_DIR": "/Model_Weights",
         "WANDB_API_KEY": "e7220eb15a89a255ac255d759c7089d1d1b88577",
         "PYTHONPATH": "${PYTHONPATH}:/workspace/SAM2",
         "AWS_CONFIG_FILE": "/workspace/.aws/config",
