@@ -19,12 +19,11 @@ def sam_video_inference(
         video_path_list: Union[str, Path, List[str], List[Path]] = relevant_dirs.get("InfuSight_ENJYJS_SHL05", os.getcwd()),
         model_size: str = "large",
         output_dir: Optional[str] = None,
-        model_weights_dir: str = relevant_dirs.get("model_weights_dir", "checkpoints"),
+        model_weights_dir: str = relevant_dirs.get("model_weights_dir", os.getenv("MODEL_WEIGHTS_DIR", "checkpoints")),
         config_dir: str = os.path.join(os.getcwd(), "sam2", "configs"),
 ) -> None:    
     # Get the list of single video filepaths
     video_path_list = get_list_of_single_filepaths(img_path_list=video_path_list)
-    video_path_list = [Path(video_path) for video_path in video_path_list]
 
     # Build the SAM2 video predictor
     model_paths = search_files(start_path=model_weights_dir, accepted_img_extensions=(".pt", ".pth"))
@@ -42,10 +41,14 @@ def sam_video_inference(
         raise ValueError(f"No SAM2 config found for model size {model_size} in {config_dir}")
     if len(model_cfg_list) > 1:
         raise ValueError(f"Found multiple SAM2 configs for model size {model_size} in {config_dir}")
-    model_cfg = str(model_cfg_list[0])
+    model_cfg = model_cfg_list[0]
+
+    # Hydra config (which loads the model config) expects relative paths - for some reason without the relative path root
+    relative_path = os.path.relpath(model_cfg, os.getcwd())
+    root_removed = os.path.join(*relative_path.split(os.sep)[1:])
 
     # Build the SAM2 video predictor
-    predictor = build_sam2_video_predictor(config_file=model_cfg, ckpt_path=checkpoint, device="cuda" if torch.cuda.is_available() else "cpu")
+    predictor = build_sam2_video_predictor(config_file=Path(root_removed), ckpt_path=checkpoint, device="cuda" if torch.cuda.is_available() else "cpu")
 
     # Run the SAM2 video predictor for each video path
     for video_path in video_path_list:
@@ -73,7 +76,7 @@ if __name__ == "__main__":
     parser.add_argument("--video_path_list", type=str, default=relevant_dirs.get("InfuSight_ENJYJS_SHL05", os.getcwd()), help="Path to the video file or directory containing video files")
     parser.add_argument("--output_dir", type=str, default=None, help="Path to the output directory")
     parser.add_argument("--model_size", type=str, default="large", help="Model size to use for SAM2")
-    parser.add_argument("--model_weights_dir", type=str, default=relevant_dirs.get("model_weights_dir", "checkpoints"), help="Path to the model weights directory")
+    parser.add_argument("--model_weights_dir", type=str, default=relevant_dirs.get("model_weights_dir", os.getenv("MODEL_WEIGHTS_DIR", "checkpoints")), help="Path to the model weights directory")
     parser.add_argument("--config_dir", type=str, default=os.path.join(os.getcwd(), "sam2", "configs"), help="Path to the model config directory")
     args = parser.parse_args()
 

@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run SAM on Video",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}run_sam_on_video.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--video_path",     "${env:IMAGE_DATASETS}${pathSeparator}InfuSight",
+                "--output_dir",     "None"
+            ]
+        }
+    ]
+}

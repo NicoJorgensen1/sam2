@@ -6,3 +6,4 @@ wandb
 timm
 matplotlib
 huggingface_hub
+decord

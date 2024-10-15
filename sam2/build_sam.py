@@ -11,6 +11,9 @@ import torch
 from hydra import compose
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
+from hydra.core.global_hydra import GlobalHydra
+from pathlib import Path
+from hydra import initialize, compose
 
 import sam2
 
@@ -122,9 +125,18 @@ def build_sam2_video_predictor(
             "++model.fill_hole_area=8",
         ]
     hydra_overrides.extend(hydra_overrides_extra)
+    
+    
+    # Clear existing Hydra instance if it's already initialized
+    if GlobalHydra.instance().is_initialized():
+        GlobalHydra.instance().clear()
+    config_dir = str(Path(config_file).parent)
+    config_name = Path(config_file).stem
+    with initialize(config_path=config_dir):
+        cfg = compose(config_name=config_name, overrides=hydra_overrides)
 
     # Read config and init model
-    cfg = compose(config_name=config_file, overrides=hydra_overrides)
+    # cfg = compose(config_name=config_file, overrides=hydra_overrides)
     OmegaConf.resolve(cfg)
     model = instantiate(cfg.model, _recursive_=True)
     _load_checkpoint(model, ckpt_path)
