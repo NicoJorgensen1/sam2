@@ -24,6 +24,7 @@ def sam_video_inference(
 ) -> None:    
     # Get the list of single video filepaths
     video_path_list = get_list_of_single_filepaths(img_path_list=video_path_list)
+    video_path_list = [Path(video_path) for video_path in video_path_list]
 
     # Build the SAM2 video predictor
     model_paths = search_files(start_path=model_weights_dir, accepted_img_extensions=(".pt", ".pth"))
@@ -57,7 +58,7 @@ def sam_video_inference(
 
         with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
 
-            state = predictor.init_state(video_path)
+            state = predictor.init_state(str(video_path))
 
             # add new prompts and instantly get the output on the same frame
             frame_idx, object_ids, masks = predictor.add_new_points_or_box(state, None)
