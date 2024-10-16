@@ -6,9 +6,11 @@ from AITrainingSharedLibrary.get_relevant_dirs import add_dirs_to_path
 from sam2.build_sam import build_sam2_video_predictor
 from typing import List, Union, Optional
 from pathlib import Path
+from tqdm import tqdm
 import argparse
 import torch
 import os
+import cv2
 
 relevant_dirs = add_dirs_to_path()
 
@@ -21,10 +23,12 @@ def sam_video_inference(
         output_dir: Optional[str] = None,
         model_weights_dir: str = relevant_dirs.get("model_weights_dir", os.getenv("MODEL_WEIGHTS_DIR", "checkpoints")),
         config_dir: str = os.path.join(os.getcwd(), "sam2", "configs"),
+        max_duration: int = 10,
 ) -> None:    
     # Get the list of single video filepaths
     video_path_list = get_list_of_single_filepaths(img_path_list=video_path_list)
-    video_path_list = [Path(video_path) for video_path in video_path_list]
+    video_path_list = [video_path for video_path in video_path_list if video_path.endswith(("mp4", "mov", "avi", "mkv", "webm"))]
+    video_path_list = filter_videos_by_duration(video_path_list, max_duration)
 
     # Build the SAM2 video predictor
     model_paths = search_files(start_path=model_weights_dir, accepted_img_extensions=(".pt", ".pth"))
@@ -69,6 +73,28 @@ def sam_video_inference(
 
 
 
+def filter_videos_by_duration(video_path_list, max_duration):
+    """Filter videos based on max_duration."""
+    filtered_video_path_list = []
+    for video_path in tqdm(video_path_list, desc="Filtering videos by duration", leave=False):
+        cap = cv2.VideoCapture(str(video_path))
+        if not cap.isOpened():
+            print(f"Warning: Unable to open video file {video_path}")
+            continue
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        duration = frame_count / fps
+        cap.release()
+        
+        if duration <= max_duration:
+            filtered_video_path_list.append(Path(video_path))
+        else:
+            print(f"Skipping {video_path} as its duration ({duration:.2f}s) exceeds the maximum allowed duration ({max_duration}s)")
+    
+    return filtered_video_path_list
+
+
+
 
 
 ### Run from CLI 
@@ -79,6 +105,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_size", type=str, default="large", help="Model size to use for SAM2")
     parser.add_argument("--model_weights_dir", type=str, default=relevant_dirs.get("model_weights_dir", os.getenv("MODEL_WEIGHTS_DIR", "checkpoints")), help="Path to the model weights directory")
     parser.add_argument("--config_dir", type=str, default=os.path.join(os.getcwd(), "sam2", "configs"), help="Path to the model config directory")
+    parser.add_argument("--max_duration", type=int, default=10, help="Maximum duration (in seconds) for each video")
     args = parser.parse_args()
 
     # Edit the input args 

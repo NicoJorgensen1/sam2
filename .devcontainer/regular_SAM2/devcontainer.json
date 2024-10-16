@@ -13,10 +13,10 @@
     // The username is also specified in the Dockerfile. If changed, make sure it is changed both places!
     // By using this localEnv it is possible to use the same path on both the local computer and the server, just remember to add export IMAGE_DATASET=/path/to/dataset in the corresponding ~/.bashrc file!
      "mounts": [
-       "source=${localEnv:IMAGE_DATASETS},target=/Image_Datasets,type=bind,consistency=cached",        // Mount the image datasets
-       "source=${localEnv:MODEL_WEIGHTS_DIR},target=/Model_Weights,type=bind,consistency=cached",      // Mount the model weights
-       "source=/home/${localEnv:USER}/.aws,target=/workspace/.aws,type=bind,consistency=cached",       // Mount the aws credentials
-       "source=/home/${localEnv:USER}/.ssh,target=/workspace/.ssh,type=bind,consistency=cached"        // Mount the ssh credentials
+       "source=${localEnv:IMAGE_DATASETS},target=/Image_Datasets,type=bind,consistency=cached",             // Mount the image datasets
+       "source=${localEnv:MODEL_WEIGHTS_DIR},target=/Model_Weights,type=bind,consistency=cached",           // Mount the model weights
+       "source=/home/${localEnv:USER}/.aws,target=/workspace/.aws,type=bind,consistency=cached",            // Mount the aws credentials
+       "source=/home/${localEnv:USER}/.ssh,target=/home/EnvisionUser/.ssh,type=bind,consistency=cached"     // Mount the ssh credentials
      ],
     
     // Add the IDs of extensions you want installed when the container is created.
