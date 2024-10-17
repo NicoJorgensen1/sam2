@@ -1,9 +1,8 @@
-polars>=1.0.0
-opencv-python
 torchinfo
-numpy
 wandb
 timm
 matplotlib
-huggingface_hub
 decord
+polars>=1.0.0
+opencv-python==4.8.0.74
+numpy<2.0.0

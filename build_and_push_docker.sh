@@ -13,7 +13,7 @@ cd "$SAM2DIR" || { echo "Failed to change directory to SAM2DIR: $SAM2DIR"; exit 
 aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 251553394525.dkr.ecr.eu-west-1.amazonaws.com
 
 # Build the docker image
-docker build -f .devcontainer/Dockerfile -t sam2_image .
+docker build -f .devcontainer/regular_SAM2/Dockerfile -t sam2_image .
 
 # Tag the docker image with the ecr repo and the 'latest' tag
 docker tag sam2_image:latest 251553394525.dkr.ecr.eu-west-1.amazonaws.com/ai_base_images_for_development:sam2_image

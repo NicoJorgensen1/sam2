@@ -38,7 +38,11 @@ RUN apt-get -y update \
         wget \
         sudo \
         ssh \
-        tree
+        tree \
+        ffmpeg \
+        libavcodec-dev \
+        libavformat-dev \
+        libswscale-dev
 
 ### Install aws client 
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
@@ -77,16 +81,10 @@ RUN sudo apt-get install bash-completion && sudo apt-get install --reinstall bas
 ################################################### Create the third layer of the image => here python requirements will be installed ####################################################
 FROM user_cacher AS python_package_installer
 
-### Copy all requirements.txt files into the container 
-COPY .devcontainer/regular_SAM2/requirements_sam2.txt requirements.txt
-
 # Install GIC shared library - which includes all standard functions 
 RUN python -m pip install pip -U
 ADD "http://envision:Envision1234@192.168.19.36:8666/packages/" cache
 RUN python -m pip install --extra-index-url http://envision:Envision1234@192.168.19.36:8666 CameraAISharedLibrary InfluxClient AWSSecretsHelper AITrainingSharedLibrary --trusted-host 192.168.19.36
-
-### Install python requirements 
-RUN python -m pip install -r requirements.txt
 
 
 
@@ -107,6 +105,10 @@ WORKDIR ${WORKING_DIR}
 COPY setup.py ${WORKING_DIR} 
 COPY README.md ${WORKING_DIR}
 RUN python -m pip install -e .
+
+### Install python requirements 
+COPY .devcontainer/regular_SAM2/requirements_sam2.txt requirements.txt
+RUN python -m pip install -r requirements.txt --force-reinstall --no-cache-dir
 
 
 
