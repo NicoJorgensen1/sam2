@@ -18,6 +18,20 @@
                 "--model_weights_dir",      "${env:MODEL_WEIGHTS_DIR}",
                 "--config_dir",             "${workspaceFolder}${pathSeparator}sam2${pathSeparator}configs",
             ]
-        }
+        },
+
+
+        {
+            "name": "Plot preprocessing steps",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}images_check_preprocessing_steps.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--img_dir",            "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Masked_frames",
+                "--save_dir",           "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Preprocessing_steps",
+                "--max_images",         "5",
+            ]
+        },
     ]
 }
