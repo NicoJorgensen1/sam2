@@ -11,9 +11,8 @@
             "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}run_sam_on_video.py",
             "console": "integratedTerminal",
             "args": [
-                "--video_path",             "${env:IMAGE_DATASETS}${pathSeparator}InfuSight",
+                "--frame_path_list",        "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Masked_frames",
                 "--output_dir",             "None",
-                "--max_duration",           "10",
                 "--model_size",             "large",
                 "--model_weights_dir",      "${env:MODEL_WEIGHTS_DIR}",
                 "--config_dir",             "${workspaceFolder}${pathSeparator}sam2${pathSeparator}configs",
