@@ -149,9 +149,19 @@ def low_freq_enhancement(image):
     img_back = cv2.magnitude(img_back[:,:,0], img_back[:,:,1])
     return cv2.normalize(img_back, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
+
 # Adaptive Thresholding
 def adaptive_threshold(image, max_value=255):
+    # Ensure the image is 8-bit single-channel
+    if image.dtype != np.uint8:
+        image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+    
+    # Ensure the image is single-channel
+    if len(image.shape) > 2:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
     return cv2.adaptiveThreshold(image, max_value, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+
 
 # Difference of Gaussians (DoG)
 def difference_of_gaussians(image, sigma1=1, sigma2=2):
