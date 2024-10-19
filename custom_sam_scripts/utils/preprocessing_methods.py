@@ -17,8 +17,15 @@ def apply_low_high_pass(current_frame):
     high_pass = np.clip(high_pass, 0, 255).astype(np.uint8)
     return low_pass, high_pass
 
-
 def apply_clahe(frame, clip_limit=2.0, tile_grid_size=(8, 8)):
+    # Ensure the frame is 8-bit single-channel
+    if frame.dtype != np.uint8:
+        frame = cv2.normalize(frame, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+    
+    # Ensure the frame is single-channel
+    if len(frame.shape) > 2:
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    
     clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
     return clahe.apply(frame)
 
@@ -63,5 +70,48 @@ def difference_of_gaussians(image, sigma1=1, sigma2=2):
     dog = blur1 - blur2
     return cv2.normalize(dog, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
+
+def inverting_images(img):
+    return np.abs(255 - img).astype(np.uint8)
+
+
+def gamma_transform(image, gamma, c=1):
+    """
+    Applies power-law (gamma) transformation to the input image.
+    
+    Args:
+    - image: Input grayscale image (numpy array).
+    - gamma: The gamma value for the transformation.
+    - c: Scaling constant (default is 1).
+    
+    Returns:
+    - Transformed image (numpy array).
+    """
+    # Normalize the image to the range 0-1
+    normalized_img = image / 255.0
+    
+    # Apply the gamma correction
+    gamma_corrected = c * np.power(normalized_img, gamma)
+    
+    # Rescale back to 0-255
+    gamma_corrected = np.clip(gamma_corrected * 255, 0, 255).astype(np.uint8)
+    
+    return gamma_corrected
+
+
+
+
+
+def histogram_equalization(image):
+    """
+    Applies histogram equalization to enhance the contrast of an image.
+    
+    Args:
+    - image: Input grayscale image (numpy array).
+    
+    Returns:
+    - Contrast-enhanced image (numpy array).
+    """
+    return cv2.equalizeHist(image)
 
 

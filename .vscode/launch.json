@@ -33,5 +33,19 @@
                 "--max_images",         "5",
             ]
         },
+
+
+        {
+            "name": "CLAHE preprocessing",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}clahe_preprocessing.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--img_dir",            "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Masked_frames",
+                "--save_dir",           "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}CLAHE_preprocessing",
+                "--max_images",         "5",
+            ]
+        },
     ]
 }
