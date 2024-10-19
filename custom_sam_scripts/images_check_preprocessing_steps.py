@@ -38,16 +38,26 @@ def plot_preprocessing_steps(
         ("No func applied", lambda img: img),
         ("Low Pass", lambda img: apply_low_high_pass(img)[0]),
         ("Low Pass - init_frame", lambda img: apply_low_high_pass(img)[0] - initial_frame),
-        ("Low Pass - low_pass(init_frame)", lambda img: apply_low_high_pass(initial_frame)[0]),
+        ("Low Pass - low_pass(init_frame)", lambda img: apply_low_high_pass(img)[0] - apply_low_high_pass(initial_frame)[0]),
         ("High Pass", lambda img: apply_low_high_pass(img)[1]),
         ("High Pass - init_frame", lambda img: apply_low_high_pass(img)[1] - initial_frame),
-        ("High Pass - high_pass(init_frame)", lambda img: apply_low_high_pass(initial_frame)[1]),
+        ("High Pass - high_pass(init_frame)", lambda img: apply_low_high_pass(img)[1] - apply_low_high_pass(initial_frame)[1]),
         ("Sobel", lambda img: cv2.Sobel(img, cv2.CV_64F, 1, 1, ksize=5)),
         ("Sobel - init_frame", lambda img: cv2.Sobel(img, cv2.CV_64F, 1, 1, ksize=5) - initial_frame),
-        ("Sobel - sobel(init_frame)", lambda img: cv2.Sobel(initial_frame, cv2.CV_64F, 1, 1, ksize=5)),
+        ("Sobel - sobel(init_frame)", lambda img: cv2.Sobel(img, cv2.CV_64F, 1, 1, ksize=5) - cv2.Sobel(initial_frame, cv2.CV_64F, 1, 1, ksize=5)),
         ("LoG", lambda img: cv2.Laplacian(cv2.GaussianBlur(img.astype(np.float64), (3, 3), 0), cv2.CV_64F)),
         ("LoG - init_frame", lambda img: cv2.Laplacian(cv2.GaussianBlur(img.astype(np.float64), (3, 3), 0), cv2.CV_64F) - initial_frame),
-        ("LoG - LoG(init_frame)", lambda img: cv2.Laplacian(cv2.GaussianBlur(initial_frame.astype(np.float64), (3, 3), 0), cv2.CV_64F)),
+        ("LoG - LoG(init_frame)", lambda img: cv2.Laplacian(cv2.GaussianBlur(img.astype(np.float64), (3, 3), 0), cv2.CV_64F) -\
+          cv2.Laplacian(cv2.GaussianBlur(initial_frame.astype(np.float64), (3, 3), 0), cv2.CV_64F)),        
+        ("Fourier Transform", low_freq_enhancement),
+        ("Fourier Transform - init_frame", lambda img: low_freq_enhancement(img) - initial_frame),
+        ("Fourier Transform - Fourier(init_frame)", lambda img: low_freq_enhancement(img) - low_freq_enhancement(initial_frame)),
+        ("Adaptive Threshold", adaptive_threshold),
+        ("Adaptive Threshold - init_frame", lambda img: adaptive_threshold(img) - initial_frame),
+        ("Adaptive Threshold - AdaptiveThreshold(init_frame)", lambda img: adaptive_threshold(img) - adaptive_threshold(initial_frame)),
+        ("Difference of Gaussians", difference_of_gaussians),
+        ("Difference of Gaussians - init_frame", lambda img: difference_of_gaussians(img) - initial_frame),
+        ("Difference of Gaussians - DifferenceOfGaussians(init_frame)", lambda img: difference_of_gaussians(img) - difference_of_gaussians(initial_frame)),
     ]
 
     ### Plot each frame
@@ -57,7 +67,7 @@ def plot_preprocessing_steps(
         iterator.set_description(f"Processing frame {row_dict.get('frameNum', img_path_idx+1)}")
 
         # Create a new figure for all frames with 5 rows and 4 columns
-        num_rows, num_cols = len(functions_to_apply), 4
+        num_rows, num_cols = len(functions_to_apply), len(titles)
         fig, axs = plt.subplots(num_rows, num_cols, figsize=(30, 30))
 
         # Load the frames
@@ -81,7 +91,10 @@ def plot_preprocessing_steps(
 
                 # Save the processed frame individually in the save_dir
                 if save_dir is not None:
-                    cv2.imwrite(os.path.join(save_dir, f"{func_name}_{title}.png"), processed_frame)
+                    func_save_dir = os.path.join(save_dir, f"{func_name}")
+                    os.makedirs(func_save_dir, exist_ok=True)
+                    new_filepath = os.path.join(func_save_dir, f"{title}_{row_dict.get('frameNum', img_path_idx+1)}.png")
+                    cv2.imwrite(new_filepath, processed_frame)
 
         fig.tight_layout()
         
@@ -119,6 +132,35 @@ def apply_clahe(frame, clip_limit=2.0, tile_grid_size=(8, 8)):
 
 def scale_image(img) -> np.ndarray:
     return cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
+
+
+# Fourier Transform to Enhance Low-Frequency Changes
+def low_freq_enhancement(image):
+    dft = cv2.dft(np.float32(image), flags=cv2.DFT_COMPLEX_OUTPUT)
+    dft_shift = np.fft.fftshift(dft)
+    rows, cols = image.shape
+    crow, ccol = rows // 2 , cols // 2
+    mask = np.zeros((rows, cols, 2), np.uint8)
+    r = 30  # Radius to cut off high frequencies
+    mask[crow-r:crow+r, ccol-r:ccol+r] = 1
+    dft_shift = dft_shift * mask
+    f_ishift = np.fft.ifftshift(dft_shift)
+    img_back = cv2.idft(f_ishift)
+    img_back = cv2.magnitude(img_back[:,:,0], img_back[:,:,1])
+    return cv2.normalize(img_back, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
+# Adaptive Thresholding
+def adaptive_threshold(image, max_value=255):
+    return cv2.adaptiveThreshold(image, max_value, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+
+# Difference of Gaussians (DoG)
+def difference_of_gaussians(image, sigma1=1, sigma2=2):
+    blur1 = cv2.GaussianBlur(image, (0, 0), sigma1)
+    blur2 = cv2.GaussianBlur(image, (0, 0), sigma2)
+    dog = blur1 - blur2
+    return cv2.normalize(dog, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
+
 
 
 
