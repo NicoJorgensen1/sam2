@@ -6,13 +6,12 @@ from AITrainingSharedLibrary.mil_create_pl_dataframe import create_pl_df
 from AITrainingSharedLibrary.setup_logger_func import setup_logger
 from custom_sam_scripts.utils.get_sam_for_video_inference import get_sam_for_video_inference
 from custom_sam_scripts.utils.save_sam2_masks import save_results
-from custom_sam_scripts.add_points_to_frame import add_points_to_frame
+from custom_sam_scripts.add_points_or_bboxes_to_frame import add_points_to_frame, add_bbox_to_frame
 from typing import List, Optional, Union, Dict
 from pathlib import Path
 import numpy as np
 import argparse
 import os
-from custom_sam_scripts.add_points_to_frame import add_points_to_frame
 relevant_dirs = add_dirs_to_path()
 
 # Create a logger to store logs in the current working directory (20 = INFO)
@@ -27,6 +26,7 @@ def run_sam_on_video_frames(
     model_weights_dir: str,
     config_dir: str,
     points: np.ndarray,
+    bboxes: np.ndarray,
     save_dir: Optional[Union[str, Path]] = None,
     **kwargs,
 ) -> Dict[int, Dict[int, np.ndarray]]:
@@ -43,6 +43,7 @@ def run_sam_on_video_frames(
         model_weights_dir (str): Directory containing SAM2 model weights.
         config_dir (str): Directory containing SAM2 model configuration files.
         points (np.ndarray): Array of points to add to the first frame, shape (N, 2).
+        bboxes (np.ndarray): Array of bounding boxes to add to the first frame, shape (N, 4).
         save_dir (Optional[Union[str, Path]], optional): Directory to save results. Defaults to None.
         **kwargs: Additional keyword arguments.
 
@@ -53,7 +54,8 @@ def run_sam_on_video_frames(
     Example:
         >>> frame_paths = [Path("frame_001.jpg"), Path("frame_002.jpg"), ...]
         >>> points = np.array([[300, 400], [500, 600]])
-        >>> segments = run_sam_on_video_frames(frame_paths, "large", "weights/", "configs/", points, "results/")
+        >>> bboxes = np.array([[100, 200, 300, 400], [500, 600, 700, 800]])
+        >>> segments = run_sam_on_video_frames(frame_paths, "large", "weights/", "configs/", points, bboxes, "results/")
 
     Note:
         - The function uses a dataframe to process frames, initializes SAM2, and propagates masks.
@@ -80,6 +82,7 @@ def run_sam_on_video_frames(
     
     # Add points to the frame using the new function
     inference_state, out_obj_ids, out_mask_logits = add_points_to_frame(sam2, inference_state, points)
+    inference_state, out_obj_ids, out_mask_logits = add_bbox_to_frame(sam2, inference_state, bboxes)
 
     # Propagate the masks across the video
     logger.info("Propagating masks across video")
