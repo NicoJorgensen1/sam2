@@ -5,6 +5,7 @@ from AITrainingSharedLibrary.mil_create_pl_dataframe import create_pl_df
 from custom_sam_scripts.utils.get_sam_for_video_inference import get_sam_for_video_inference
 from typing import List
 from pathlib import Path
+import numpy as np
 import argparse
 import os
 relevant_dirs = add_dirs_to_path()
@@ -31,6 +32,29 @@ def run_sam_on_video_frames(
 
     # Set the inference state
     inference_state = sam2.init_state(video_path=frame_path_list)
+    sam2.reset_state(inference_state)
+
+
+
+    ann_frame_idx = 0   # the frame index we interact with
+    ann_obj_id = 1      # give a unique id to each object we interact with (it can be any integers)
+
+    # Let's add a positive click at (x, y) = (300, 900) to get started
+    points = np.array([[300, 900]], dtype=np.float32)
+    # for labels, `1` means positive click and `0` means negative click
+    labels = np.array([1], np.int32)
+    _, out_obj_ids, out_mask_logits = sam2.add_new_points_or_box(
+        inference_state=inference_state,
+        frame_idx=ann_frame_idx,
+        obj_id=ann_obj_id,
+        points=points,
+        labels=labels,
+    )
+
+    video_segments = {out_frame_idx: {out_obj_id: (out_mask_logits[i] > 0.0).cpu().numpy() for i, out_obj_id in enumerate(out_obj_ids)} 
+                                for out_frame_idx, out_obj_ids, out_mask_logits in sam2.propagate_in_video(inference_state)}
+    
+
 
 
 
