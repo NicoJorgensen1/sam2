@@ -27,7 +27,7 @@
             "name": "Plot preprocessing steps",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}images_check_preprocessing_steps.py",
+            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}preprocessing${pathSeparator}images_check_preprocessing_steps.py",
             "console": "integratedTerminal",
             "args": [
                 "--img_dir",            "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Masked_frames",
@@ -41,7 +41,7 @@
             "name": "CLAHE preprocessing",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}clahe_preprocessing.py",
+            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}preprocessing${pathSeparator}clahe_preprocessing.py",
             "console": "integratedTerminal",
             "args": [
                 "--img_dir",            "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Masked_frames",
