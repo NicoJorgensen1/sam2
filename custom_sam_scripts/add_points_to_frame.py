@@ -23,7 +23,7 @@ def add_points_to_frame(
         ann_obj_id (int, optional): Unique ID for the object being interacted with. Defaults to 1.
 
     Returns:
-        tuple: A tuple containing (_, out_obj_ids, out_mask_logits).
+        Tuple: A tuple containing (_, out_obj_ids, out_mask_logits).
     """
     # For labels, `1` means positive click and `0` means negative click
     labels = np.ones(len(points), dtype=np.int32)

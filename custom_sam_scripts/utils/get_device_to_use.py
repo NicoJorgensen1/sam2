@@ -3,6 +3,25 @@ import torch
 
 
 def get_device():
+    """
+    Determine and configure the appropriate computational device for PyTorch operations.
+
+    This function checks for available hardware and returns the most suitable device
+    for running PyTorch operations. It also applies specific optimizations for CUDA devices.
+
+    Returns:
+        torch.device: The selected device (cuda, mps, or cpu).
+
+    Side effects:
+        - For CUDA devices:
+            - Enables bfloat16 autocast.
+            - Enables TensorFloat-32 (TF32) for Ampere GPUs and later.
+        - For MPS devices:
+            - Prints a warning about preliminary support and potential performance issues.
+
+    Note:
+        The function prioritizes CUDA > MPS > CPU in device selection.
+    """
     # select the device for computation
     if torch.cuda.is_available():
         device = torch.device("cuda")

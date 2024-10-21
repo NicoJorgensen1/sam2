@@ -7,7 +7,7 @@ from AITrainingSharedLibrary.setup_logger_func import setup_logger
 from custom_sam_scripts.utils.get_sam_for_video_inference import get_sam_for_video_inference
 from custom_sam_scripts.utils.save_sam2_masks import save_results
 from custom_sam_scripts.add_points_to_frame import add_points_to_frame
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 from pathlib import Path
 import numpy as np
 import argparse
@@ -29,7 +29,37 @@ def run_sam_on_video_frames(
     points: np.ndarray,
     save_dir: Optional[Union[str, Path]] = None,
     **kwargs,
-) -> None:
+) -> Dict[int, Dict[int, np.ndarray]]:
+    """
+    Run SAM2 (Segment Anything Model 2) on a list of video frames.
+
+    This function processes a list of video frames using SAM2, initializes the model,
+    adds points to the first frame, propagates masks across the video, and optionally
+    saves the results.
+
+    Args:
+        frame_path_list (List[Path]): List of paths to video frames.
+        model_size (str): Size of the SAM2 model (e.g., "large", "base").
+        model_weights_dir (str): Directory containing SAM2 model weights.
+        config_dir (str): Directory containing SAM2 model configuration files.
+        points (np.ndarray): Array of points to add to the first frame, shape (N, 2).
+        save_dir (Optional[Union[str, Path]], optional): Directory to save results. Defaults to None.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        Dict[int, Dict[int, np.ndarray]]: Dictionary of video segments, where keys are
+        frame indices and values are dictionaries of object IDs and their mask arrays.
+
+    Example:
+        >>> frame_paths = [Path("frame_001.jpg"), Path("frame_002.jpg"), ...]
+        >>> points = np.array([[300, 400], [500, 600]])
+        >>> segments = run_sam_on_video_frames(frame_paths, "large", "weights/", "configs/", points, "results/")
+
+    Note:
+        - The function uses a dataframe to process frames, initializes SAM2, and propagates masks.
+        - It logs various steps and information using a logger.
+        - Results are saved only if a save_dir is provided.
+    """
     logger.info("Starting SAM2 video segmentation")
     
     # Get a dataframe of the frames
@@ -60,7 +90,7 @@ def run_sam_on_video_frames(
 
     # Save the results
     if save_dir:
-        save_results(video_segments=video_segments, output_dir=save_dir)
+        save_results(video_segments=video_segments, output_dir=save_dir, frame_df=frame_df)
 
     logger.info("SAM2 video segmentation completed")
     return video_segments
@@ -99,4 +129,4 @@ if __name__ == "__main__":
     print_args(args=args, ljust_length=20, init_str="This is the arguments when running SAM2 on a video", verbose_func=logger.info)
 
     # Run the script
-    run_sam_on_video_frames(**vars(args))
+    video_segments = run_sam_on_video_frames(**vars(args))

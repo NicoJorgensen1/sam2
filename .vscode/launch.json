@@ -8,7 +8,7 @@
             "name": "Run SAM on Video",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}run_sam_on_video.py",
+            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}run_sam_on_video_frames.py",
             "console": "integratedTerminal",
             "justMyCode": false,
             "args": [

@@ -10,7 +10,6 @@ from AITrainingSharedLibrary.mil_create_pl_dataframe import create_pl_df
 import os
 import warnings
 from threading import Thread
-from typing import BaseException
 
 import numpy as np
 import torch
@@ -138,7 +137,10 @@ class AsyncVideoFrameLoader:
         # load the rest of frames asynchronously without blocking the session start
         def _load_frames():
             try:
-                for n in tqdm(range(len(self.images)), desc="frame loading (JPEG)"):
+                num_frames = len(self.img_paths)
+                frame_loading_prog_bar = tqdm(range(len(self.images)), desc="frame loading", total=len(self.img_paths))
+                for n in frame_loading_prog_bar:
+                    frame_loading_prog_bar.set_postfix(f"Reading frame {n+1} of {num_frames}")
                     self.__getitem__(n)
             except Exception as e:
                 self.exception = e

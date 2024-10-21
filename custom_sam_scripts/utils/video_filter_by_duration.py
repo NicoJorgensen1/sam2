@@ -15,7 +15,27 @@ def filter_videos_by_duration(
     max_duration: int,
     verbose: bool = False,
 ) -> List[Path]:
-    """Filter videos based on max_duration."""
+    """
+    Filter a list of video paths based on their duration.
+
+    This function processes a list of video file paths, checks the duration of each video,
+    and returns a new list containing only the videos with a duration less than or equal
+    to the specified maximum duration.
+
+    Args:
+        video_path_list (List[Path]): A list of Path objects representing video file paths.
+        max_duration (int): The maximum allowed duration for videos in minutes.
+        verbose (bool, optional): If True, print messages about skipped videos. Defaults to False.
+
+    Returns:
+        List[Path]: A list of Path objects representing video files that meet the duration criteria.
+
+    Note:
+        - This function uses OpenCV to read video properties.
+        - Videos that cannot be opened will be skipped with a warning message.
+        - The duration is calculated as (frame count / frames per second).
+        - The function uses tqdm to show a progress bar during processing.
+    """
     filtered_video_path_list = []
     for video_path in tqdm(video_path_list, desc="Filtering videos by duration", leave=False):
         cap = cv2.VideoCapture(str(video_path))
