@@ -104,7 +104,7 @@ WORKDIR ${WORKING_DIR}
 # Install the SAM2 package
 COPY setup.py ${WORKING_DIR} 
 COPY README.md ${WORKING_DIR}
-RUN python -m pip install -e .
+RUN python -m pip install -e .["notebooks"]
 
 ### Install python requirements 
 COPY .devcontainer/regular_SAM2/requirements_sam2.txt requirements.txt

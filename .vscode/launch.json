@@ -10,12 +10,15 @@
             "request": "launch",
             "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}run_sam_on_video.py",
             "console": "integratedTerminal",
+            "justMyCode": false,
             "args": [
                 "--frame_path_list",        "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Masked_frames",
-                "--output_dir",             "None",
+                "--save_dir",               "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}SAM_results",
                 "--model_size",             "large",
                 "--model_weights_dir",      "${env:MODEL_WEIGHTS_DIR}",
                 "--config_dir",             "${workspaceFolder}${pathSeparator}sam2${pathSeparator}configs",
+                "--points",                 "900 300",
+                "--bboxes",                 "0 0 100 100",
             ]
         },
 

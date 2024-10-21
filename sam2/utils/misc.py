@@ -4,6 +4,9 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+from CameraAISharedLibrary.ensure_list_input import ensure_list
+from AITrainingSharedLibrary.mil_create_pl_dataframe import create_pl_df
+
 import os
 import warnings
 from threading import Thread
@@ -239,17 +242,9 @@ def load_video_frames_from_jpg_images(
             "where `-q:v` generates high-quality JPEG frames and `-start_number 0` asks "
             "ffmpeg to start the JPEG file from 00000.jpg."
         )
-
-    frame_names = [
-        p
-        for p in os.listdir(jpg_folder)
-        if os.path.splitext(p)[-1] in [".jpg", ".jpeg", ".JPG", ".JPEG"]
-    ]
-    frame_names.sort(key=lambda p: int(os.path.splitext(p)[0]))
-    num_frames = len(frame_names)
-    if num_frames == 0:
-        raise RuntimeError(f"no images found in {jpg_folder}")
-    img_paths = [os.path.join(jpg_folder, frame_name) for frame_name in frame_names]
+    frame_df = create_pl_df(ds_paths=jpg_folder, images_only=True)
+    frame_df = ensure_list(frame_df)[0].sort("frameNum", descending=False)
+    img_paths = frame_df["img_path"].to_list()
     img_mean = torch.tensor(img_mean, dtype=torch.float32)[:, None, None]
     img_std = torch.tensor(img_std, dtype=torch.float32)[:, None, None]
 
@@ -264,7 +259,7 @@ def load_video_frames_from_jpg_images(
         )
         return lazy_images, lazy_images.video_height, lazy_images.video_width
 
-    images = torch.zeros(num_frames, 3, image_size, image_size, dtype=torch.float32)
+    images = torch.zeros(frame_df.height, 3, image_size, image_size, dtype=torch.float32)
     for n, img_path in enumerate(tqdm(img_paths, desc="frame loading (JPEG)")):
         images[n], video_height, video_width = _load_img_as_tensor(img_path, image_size)
     if not offload_video_to_cpu:
