@@ -261,7 +261,9 @@ def load_video_frames_from_jpg_images(
         return lazy_images, lazy_images.video_height, lazy_images.video_width
 
     images = torch.zeros(frame_df.height, 3, image_size, image_size, dtype=torch.float32)
-    for n, img_path in enumerate(tqdm(img_paths, desc="frame loading (JPEG)")):
+    frame_loading_prog_bar = tqdm(enumerate(img_paths), total=len(img_paths))
+    for n, img_path in frame_loading_prog_bar:
+        frame_loading_prog_bar.set_description(f"Reading frame {n+1:d} of {len(img_paths):d}")
         images[n], video_height, video_width = _load_img_as_tensor(img_path, image_size)
     if not offload_video_to_cpu:
         images = images.to(compute_device)

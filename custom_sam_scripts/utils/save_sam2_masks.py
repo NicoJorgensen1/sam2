@@ -54,17 +54,17 @@ def save_results(
     save_res_prog_bar = tqdm(zip(frame_df.iter_rows(named=True), video_segments.items()), desc="Saving results", total=num_frames, leave=False)
     for row, (frame_idx, obj_masks) in save_res_prog_bar:
         # Get the original image
-        save_res_prog_bar.set_postfix(f"Saving frame {frame_idx} of {num_frames}")
+        save_res_prog_bar.set_description(f"Saving frame {frame_idx+1:d} of {num_frames:d}")
         orig_img = Image.open(row.get("img_path"))
-        orig_img.save(output_dir / "orig" / f"frame_{frame_idx}.png")
+        orig_img.save(output_dir / "orig" / f"frame_{frame_idx+1:d}.png")
         
         # Save the masks and blended images
         for obj_id, mask in obj_masks.items():
             mask = mask.squeeze()
             mask_image = Image.fromarray((mask * 255).astype(np.uint8))
             blended_image = blend_image_and_mask(img_array=orig_img, mask_array=mask)
-            mask_image.save(output_dir / "masks" / f"frame_{frame_idx}_object_{obj_id}.png")
-            Image.fromarray(blended_image).save(output_dir / "blended" / f"frame_{frame_idx}_object_{obj_id}.png")
+            mask_image.save(output_dir / "masks" / f"frame_{frame_idx+1:d}_object_{obj_id:d}.png")
+            Image.fromarray(blended_image).save(output_dir / "blended" / f"frame_{frame_idx+1:d}_object_{obj_id:d}.png")
     
     if logger:
         logger.info(f"Results saved to {output_dir}")

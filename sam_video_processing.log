@@ -90,3 +90,62 @@ save_dir:                   of type: str              /Image_Datasets/InfuSight/
 
 21-Oct-2024 10:39:12 - INFO:  Starting SAM2 video segmentation
 21-Oct-2024 10:39:13 - INFO:  Processed 468 frames
+21-Oct-2024 10:39:15 - INFO:  Initialized SAM2 model with size large
+21-Oct-2024 10:39:35 - INFO:  Initialized inference state
+21-Oct-2024 10:39:35 - INFO:  Propagating masks across video
+21-Oct-2024 10:40:06 - INFO:  Processed 468 frames
+21-Oct-2024 10:40:42 - INFO:  
+This is the arguments when running SAM2 on a video:
+bboxes:                     of type: ndarray          Shape: (1, 4), Data: [
+                                                       [0, 0, 100, 100]]
+config_dir:                 of type: str              /workspace/SAM2/sam2/configs
+frame_path_list:            of type: str              /Image_Datasets/InfuSight/ENCXYN/SHL01/Masked_frames
+model_size:                 of type: str              large
+model_weights_dir:          of type: str              /Model_Weights
+points:                     of type: ndarray          Shape: (1, 2), Data: [
+                                                       [900, 300]]
+save_dir:                   of type: str              /Image_Datasets/InfuSight/ENCXYN/SHL01/SAM_results
+
+21-Oct-2024 10:40:42 - INFO:  Starting SAM2 video segmentation
+21-Oct-2024 10:40:42 - INFO:  Processed 468 frames
+21-Oct-2024 10:40:44 - INFO:  Initialized SAM2 model with size large
+21-Oct-2024 10:41:05 - INFO:  Initialized inference state
+21-Oct-2024 10:41:05 - INFO:  Propagating masks across video
+21-Oct-2024 10:41:36 - INFO:  Processed 468 frames
+21-Oct-2024 10:47:11 - INFO:  
+This is the arguments when running SAM2 on a video:
+bboxes:                     of type: ndarray          Shape: (1, 4), Data: [
+                                                       [0, 0, 100, 100]]
+config_dir:                 of type: str              /workspace/SAM2/sam2/configs
+frame_path_list:            of type: str              /Image_Datasets/InfuSight/ENCXYN/SHL01/Masked_frames
+model_size:                 of type: str              large
+model_weights_dir:          of type: str              /Model_Weights
+points:                     of type: ndarray          Shape: (1, 2), Data: [
+                                                       [900, 300]]
+save_dir:                   of type: str              /Image_Datasets/InfuSight/ENCXYN/SHL01/SAM_results
+
+21-Oct-2024 10:47:11 - INFO:  Starting SAM2 video segmentation
+21-Oct-2024 10:47:11 - INFO:  Processed 468 frames
+21-Oct-2024 10:47:13 - INFO:  Initialized SAM2 model with size large
+21-Oct-2024 10:47:34 - INFO:  Initialized inference state
+21-Oct-2024 10:47:34 - INFO:  Propagating masks across video
+21-Oct-2024 10:48:05 - INFO:  Processed 468 frames
+21-Oct-2024 10:50:18 - INFO:  
+This is the arguments when running SAM2 on a video:
+bboxes:                     of type: ndarray          Shape: (1, 4), Data: [
+                                                       [0, 300, 2000, 500]]
+config_dir:                 of type: str              /workspace/SAM2/sam2/configs
+frame_path_list:            of type: str              /Image_Datasets/InfuSight/ENCXYN/SHL01/Masked_frames
+model_size:                 of type: str              large
+model_weights_dir:          of type: str              /Model_Weights
+points:                     of type: ndarray          Shape: (1, 2), Data: [
+                                                       [930, 300]]
+save_dir:                   of type: str              /Image_Datasets/InfuSight/ENCXYN/SHL01/SAM_results
+
+21-Oct-2024 10:50:18 - INFO:  Starting SAM2 video segmentation
+21-Oct-2024 10:50:18 - INFO:  Processed 468 frames
+21-Oct-2024 10:50:20 - INFO:  Initialized SAM2 model with size large
+21-Oct-2024 10:50:41 - INFO:  Initialized inference state
+21-Oct-2024 10:50:41 - INFO:  Propagating masks across video
+21-Oct-2024 10:51:13 - INFO:  Processed 468 frames
+21-Oct-2024 10:54:47 - INFO:  SAM2 video segmentation completed

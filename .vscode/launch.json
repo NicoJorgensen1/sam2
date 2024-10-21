@@ -17,8 +17,9 @@
                 "--model_size",             "large",
                 "--model_weights_dir",      "${env:MODEL_WEIGHTS_DIR}",
                 "--config_dir",             "${workspaceFolder}${pathSeparator}sam2${pathSeparator}configs",
-                "--points",                 "900 300",
-                "--bboxes",                 "0 0 100 100",
+                "--points",                 "930 300", "50 700",
+                "--neg_points",             "1000 1000",
+                "--bboxes",                 "0 300 2000 500",
             ]
         },
 
