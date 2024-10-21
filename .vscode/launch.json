@@ -50,5 +50,18 @@
                 "--max_images",         "5",
             ]
         },
+
+        {
+            "name": "New Preprocessing",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}preprocessing${pathSeparator}divide_processing.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--img_dir",            "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Frames",
+                "--save_dir",           "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}New_preprocessing",
+                "--max_images",         "5",
+            ]
+        },
     ]
 }
