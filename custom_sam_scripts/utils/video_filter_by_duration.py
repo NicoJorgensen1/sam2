@@ -66,7 +66,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Print the args
-    print_args(args=args, ljust_length=20, init_str="This is the input args chosen when filtering videos based on duration")
+    print_args(args=args, init_str="This is the input args chosen when filtering videos based on duration")
 
     # Run the function
     file_df = ensure_list(create_pl_df(ds_paths=args.directory, videos_only=True))[0]

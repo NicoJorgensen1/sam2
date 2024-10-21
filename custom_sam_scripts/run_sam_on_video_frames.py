@@ -84,17 +84,19 @@ def run_sam_on_video_frames(
     logger.info("Initialized inference state")
 
     # Add points and bboxes to the frame
-    inference_state, out_obj_ids, out_mask_logits = add_points_and_bboxes(sam2, inference_state, points, bboxes, neg_points)
+    inference_state, out_mask_logits = add_points_and_bboxes(sam2, inference_state, points, bboxes, neg_points, frame_idx=0)
 
     # Propagate the masks across the video
-    logger.info("Propagating masks across video")
-    video_segments = {out_frame_idx: {out_obj_id: (out_mask_logits[i] > 0.0).cpu().numpy() for i, out_obj_id in enumerate(out_obj_ids)} 
+    video_segments = {}
+    if out_mask_logits:
+        logger.info("Propagating masks across video")
+        video_segments = {out_frame_idx: {out_obj_id: (out_mask_logits[i] > 0.0).cpu().numpy() for i, out_obj_id in enumerate(out_obj_ids)} 
                                 for out_frame_idx, out_obj_ids, out_mask_logits in sam2.propagate_in_video(inference_state)}
     logger.info(f"Processed {len(video_segments)} frames")
 
 
     # Save the results
-    if save_dir:
+    if save_dir is not None and video_segments:
         save_results(video_segments=video_segments, output_dir=save_dir, frame_df=frame_df)
 
     logger.info("SAM2 video segmentation completed")
@@ -127,6 +129,11 @@ if __name__ == "__main__":
         args.points = np.asarray([extract_numbers_from_string(inp_string=p, return_all=True, dtype=int) for p in args.points])
     else:
         args.points = None
+    if "none" not in str(args.neg_points).lower():
+        args.neg_points = args.neg_points.split(",")
+        args.neg_points = np.asarray([extract_numbers_from_string(inp_string=p, return_all=True, dtype=int) for p in args.neg_points])
+    else:
+        args.neg_points = None
     if "none" not in str(args.bboxes).lower():
         args.bboxes = args.bboxes.split(",")
         args.bboxes = np.asarray([extract_numbers_from_string(inp_string=b, return_all=True, dtype=int) for b in args.bboxes])
@@ -134,7 +141,7 @@ if __name__ == "__main__":
         args.bboxes = None
 
     # Print the arguments
-    print_args(args=args, ljust_length=20, init_str="This is the arguments when running SAM2 on a video")
+    print_args(args=args, init_str="This is the arguments when running SAM2 on a video")
 
     # Run the script
     video_segments = run_sam_on_video_frames(**vars(args))

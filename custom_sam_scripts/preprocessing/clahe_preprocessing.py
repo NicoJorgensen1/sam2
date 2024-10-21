@@ -129,7 +129,7 @@ if __name__ == "__main__":
     args.max_images = None if str(args.max_images).lower() == "none" else extract_numbers_from_string(inp_string=str(args.max_images), dtype=int, numbersWanted=1, return_all=False)
 
     # Print the input args 
-    print_args(args=args, ljust_length=20, init_str="This is the input args when plotting preprocessing steps")
+    print_args(args=args, init_str="This is the input args when plotting preprocessing steps")
 
     # Run the function
     CLAHE_preprocessing(**vars(args))

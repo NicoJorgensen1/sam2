@@ -11,6 +11,7 @@ def add_points_and_bboxes(
     points: np.ndarray,
     bboxes: np.ndarray,
     neg_points: np.ndarray,
+    frame_idx: int = 0,
     obj_id: int = 1,
 ) -> Tuple[Any, np.ndarray]:
     """
@@ -29,6 +30,7 @@ def add_points_and_bboxes(
                              of negative points.
         bboxes (np.ndarray): Array of bounding boxes to add, shape (K, 4) where K is the
                              number of bounding boxes.
+        frame_idx (int): The frame index to interact with.
         obj_id (int, optional): The starting object ID. Defaults to 1.
 
     Returns:
@@ -44,16 +46,27 @@ def add_points_and_bboxes(
     out_mask_logits = []
     
     # Process points
-    if points is not None:
-        for obj_points in points:
-            inference_state, _, mask_logits = add_points_to_frame(sam2, inference_state, obj_points, ann_obj_id=obj_id)
-            out_mask_logits.extend(mask_logits)
+    if points is not None or neg_points is not None:
+        inference_state, _, mask_logits = add_points_to_frame(
+            sam2=sam2,
+            inference_state=inference_state,
+            points=points,
+            neg_points=neg_points,
+            frame_idx=frame_idx,
+            ann_obj_id=obj_id
+        )
+        out_mask_logits.extend(mask_logits)
     
     # Process bboxes
     if bboxes is not None:
-        for obj_bbox in bboxes:
-            inference_state, _, mask_logits = add_bbox_to_frame(sam2, inference_state, obj_bbox, ann_obj_id=obj_id)
-            out_mask_logits.extend(mask_logits)
+        inference_state, _, mask_logits = add_bbox_to_frame(
+            sam2=sam2,
+            inference_state=inference_state,
+            bbox=bboxes,
+            frame_idx=frame_idx,
+            ann_obj_id=obj_id
+        )
+        out_mask_logits.extend(mask_logits)
     
     return inference_state, out_mask_logits
 
@@ -64,7 +77,7 @@ def add_points_to_frame(
     inference_state: Any,
     points: np.ndarray = None,
     neg_points: np.ndarray = None,
-    ann_frame_idx: int = 0,
+    frame_idx: int = 0,
     ann_obj_id: int = 1,
 ) -> Tuple[Any, np.ndarray, np.ndarray]:
     """
@@ -76,7 +89,7 @@ def add_points_to_frame(
         points (np.ndarray): Array of positive points to add, shape (N, 2) where N is the number of points.
         neg_points (np.ndarray): Array of negative points to add, shape (M, 2) where M is the number
                              of negative points.
-        ann_frame_idx (int, optional): The frame index to interact with. Defaults to 0.
+        frame_idx (int, optional): The frame index to interact with. Defaults to 0.
         ann_obj_id (int, optional): Unique ID for the object being interacted with. Defaults to 1.
 
     Returns:
@@ -86,16 +99,20 @@ def add_points_to_frame(
     labels = np.ones(len(points), dtype=np.int32) if points is not None else np.asarray([], dtype=np.int32)
     neg_labels = np.zeros(len(neg_points), dtype=np.int32) if neg_points is not None else np.asarray([], dtype=np.int32)
     
+    # Assure fitting dimensions
+    points = points.reshape(-1, 2) if points is not None else np.empty((0, 2), dtype=np.int32)
+    neg_points = neg_points.reshape(-1, 2) if neg_points is not None else np.empty((0, 2), dtype=np.int32)
+
     # Concatenate points and labels
-    points = np.concatenate([points, neg_points])
-    labels = np.concatenate([labels, neg_labels])
+    used_points = np.concatenate((points, neg_points), axis=0)
+    used_labels = np.concatenate([labels, neg_labels], axis=0)
     
     _, out_obj_ids, out_mask_logits = sam2.add_new_points_or_box(
         inference_state=inference_state,
-        frame_idx=ann_frame_idx,
+        frame_idx=frame_idx,
         obj_id=ann_obj_id,
-        points=points,
-        labels=labels,
+        points=used_points,
+        labels=used_labels,
     )
     
     return inference_state, out_obj_ids, out_mask_logits
@@ -106,7 +123,7 @@ def add_bbox_to_frame(
     sam2: nn.Module,
     inference_state: Any,
     bbox: np.ndarray,
-    ann_frame_idx: int = 0,
+    frame_idx: int = 0,
     ann_obj_id: int = 1,
 ) -> Tuple[Any, np.ndarray, np.ndarray]:
     """
@@ -116,7 +133,7 @@ def add_bbox_to_frame(
         sam2 (nn.Module): The SAM2 model instance.
         inference_state (Any): The current inference state.
         bbox (np.ndarray): Array representing the bounding box, shape (4,) in format [x_min, y_min, x_max, y_max].
-        ann_frame_idx (int, optional): The frame index to interact with. Defaults to 0.
+        frame_idx (int, optional): The frame index to interact with. Defaults to 0.
         ann_obj_id (int, optional): Unique ID for the object being interacted with. Defaults to 1.
 
     Returns:
@@ -124,7 +141,7 @@ def add_bbox_to_frame(
     """
     _, out_obj_ids, out_mask_logits = sam2.add_new_points_or_box(
         inference_state=inference_state,
-        frame_idx=ann_frame_idx,
+        frame_idx=frame_idx,
         obj_id=ann_obj_id,
         box=bbox,
     )
