@@ -10,6 +10,7 @@ from AITrainingSharedLibrary.mil_create_pl_dataframe import create_pl_df
 import os
 import warnings
 from threading import Thread
+from typing import BaseException
 
 import numpy as np
 import torch
@@ -87,9 +88,7 @@ def mask_to_box(masks: torch.Tensor):
     max_xs, _ = torch.max(torch.where(masks, grid_xs, -1).flatten(-2), dim=-1)
     min_ys, _ = torch.min(torch.where(masks, grid_ys, h).flatten(-2), dim=-1)
     max_ys, _ = torch.max(torch.where(masks, grid_ys, -1).flatten(-2), dim=-1)
-    bbox_coords = torch.stack((min_xs, min_ys, max_xs, max_ys), dim=-1)
-
-    return bbox_coords
+    return torch.stack((min_xs, min_ys, max_xs, max_ys), dim=-1)
 
 
 def _load_img_as_tensor(img_path, image_size):
@@ -149,7 +148,7 @@ class AsyncVideoFrameLoader:
 
     def __getitem__(self, index):
         if self.exception is not None:
-            raise RuntimeError("Failure in frame loading thread") from self.exception
+            raise RuntimeError(f"Failure in frame loading thread: {self.exception}")
 
         img = self.images[index]
         if img is not None:
@@ -288,11 +287,12 @@ def load_video_frames_from_video_file(
     # Get the original video height and width
     decord.bridge.set_bridge("torch")
     video_height, video_width, _ = decord.VideoReader(video_path).next().shape
-    # Iterate over all frames in the video
-    images = []
-    for frame in decord.VideoReader(video_path, width=image_size, height=image_size):
-        images.append(frame.permute(2, 0, 1))
-
+    images = [
+        frame.permute(2, 0, 1)
+        for frame in decord.VideoReader(
+            video_path, width=image_size, height=image_size
+        )
+    ]
     images = torch.stack(images, dim=0).float() / 255.0
     if not offload_video_to_cpu:
         images = images.to(compute_device)
