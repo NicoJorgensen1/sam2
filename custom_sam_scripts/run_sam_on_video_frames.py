@@ -6,11 +6,13 @@ from AITrainingSharedLibrary.mil_create_pl_dataframe import create_pl_df
 from AITrainingSharedLibrary.setup_logger_func import setup_logger
 from custom_sam_scripts.utils.get_sam_for_video_inference import get_sam_for_video_inference
 from custom_sam_scripts.utils.save_sam2_masks import save_results
+from custom_sam_scripts.add_points_to_frame import add_points_to_frame
 from typing import List, Optional, Union
 from pathlib import Path
 import numpy as np
 import argparse
 import os
+from custom_sam_scripts.add_points_to_frame import add_points_to_frame
 relevant_dirs = add_dirs_to_path()
 
 # Create a logger to store logs in the current working directory (20 = INFO)
@@ -24,7 +26,7 @@ def run_sam_on_video_frames(
     model_size: str,
     model_weights_dir: str,
     config_dir: str,
-    points: List[str] = None,
+    points: np.ndarray,
     save_dir: Optional[Union[str, Path]] = None,
     **kwargs,
 ) -> None:
@@ -45,23 +47,9 @@ def run_sam_on_video_frames(
     inference_state = sam2.init_state(video_path=frame_path_list)
     sam2.reset_state(inference_state)
     logger.info("Initialized inference state")
-
-    ann_frame_idx = 0   # the frame index we interact with
-    ann_obj_id = 1      # give a unique id to each object we interact with (it can be any integers)
     
-    logger.info(f"Using points: {points}")
-
-    # for labels, `1` means positive click and `0` means negative click
-    labels = np.array([1] * len(points), np.int32)
-    _, out_obj_ids, out_mask_logits = sam2.add_new_points_or_box(
-        inference_state=inference_state,
-        frame_idx=ann_frame_idx,
-        obj_id=ann_obj_id,
-        points=points,
-        labels=labels,
-    )
-    logger.info(f"Added {len(points)} points for object {ann_obj_id}")
-
+    # Add points to the frame using the new function
+    inference_state, out_obj_ids, out_mask_logits = add_points_to_frame(sam2, inference_state, points)
 
     # Propagate the masks across the video
     logger.info("Propagating masks across video")
