@@ -42,7 +42,8 @@ RUN apt-get -y update \
         ffmpeg \
         libavcodec-dev \
         libavformat-dev \
-        libswscale-dev
+        libswscale-dev \
+        python3-tk
 
 ### Install aws client 
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
