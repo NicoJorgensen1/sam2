@@ -63,5 +63,19 @@
                 "--max_images",         "5",
             ]
         },
+
+        {
+            "name": "Jens Test Division",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}preprocessing${pathSeparator}Jens_test_division.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--img1_path",  "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}image_1.jpeg",
+                "--img2_path",  "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}image_2.jpeg",
+                "--save_dir",   "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Division_results",
+                "--show_plot",  "true"
+            ]
+        },
     ]
 }
