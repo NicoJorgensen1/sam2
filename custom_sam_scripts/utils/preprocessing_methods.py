@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-
+from typing import Optional
 
 
 def subtract_initial_frame(new_frame, initial_frame):
@@ -17,18 +17,21 @@ def subtract_initial_frame(new_frame, initial_frame):
     return new_frame - initial_frame
 
 
-def divide_by_initial_frame(new_frame, initial_frame):
+def divide_by_initial_frame(new_frame: np.ndarray, initial_frame: np.ndarray, mask: Optional[np.ndarray] = None) -> np.ndarray:
     """
     Divide a new frame by the initial frame and scale the result.
 
     Args:
         new_frame (np.ndarray): The new frame to process.
         initial_frame (np.ndarray): The initial frame to divide by.
-
+        mask (np.ndarray, optional): If applied, only consider pixels where mask is True.
     Returns:
         np.ndarray: The result of dividing the new frame by the initial frame, scaled to 0-255 range.
     """
-    return (new_frame.astype(np.float32) / (initial_frame.astype(np.float32) + 1e-6)) * 255
+    division_result = (new_frame.astype(np.float32) / (initial_frame.astype(np.float32) + 1e-6)) * 255
+    if mask is not None:
+        division_result = np.where(mask, division_result, new_frame)
+    return division_result
 
 
 def apply_low_high_pass(current_frame):
@@ -72,17 +75,36 @@ def apply_clahe(frame, clip_limit=2.0, tile_grid_size=(8, 8)):
     return clahe.apply(frame)
 
 
-def scale_image(img) -> np.ndarray:
+def scale_image(img, mask: Optional[np.ndarray] = None) -> np.ndarray:
     """
-    Normalize the image to the 0-255 range.
+    Normalize the image to the 0-255 range, only within the masked region.
 
     Args:
         img (np.ndarray): The image to scale.
+        mask (np.ndarray, optional): Boolean mask indicating the region to normalize.
 
     Returns:
         np.ndarray: The scaled image.
     """
-    return cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
+    if mask is None:
+        return cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
+    
+    # Create a copy of the input image
+    result = img.copy()
+    
+    # Find min and max values only within the masked region
+    min_val = np.min(img[mask])
+    max_val = np.max(img[mask])
+    
+    # Avoid division by zero
+    if max_val > min_val:
+        # Apply normalization only to the masked region
+        result[mask] = ((img[mask] - min_val) * 255 / (max_val - min_val)).astype(img.dtype)
+    else:
+        # If all pixels have the same value, set them to 128 (middle of 0-255 range)
+        result[mask] = 128
+    
+    return result
 
 
 # Fourier Transform to Enhance Low-Frequency Changes
@@ -111,14 +133,14 @@ def low_freq_enhancement(image):
 
 
 # Adaptive Thresholding
-def adaptive_threshold(image, max_value=255):
+def adaptive_threshold(image, max_value=255, mask: Optional[np.ndarray] = None):
     """
     Apply adaptive thresholding to the image.
 
     Args:
         image (np.ndarray): The image to process.
         max_value (int, optional): Maximum value for thresholding. Defaults to 255.
-
+        mask (np.ndarray, optional): Boolean mask indicating the region to apply the threshold.
     Returns:
         np.ndarray: The thresholded image.
     """
@@ -130,7 +152,14 @@ def adaptive_threshold(image, max_value=255):
     if len(image.shape) > 2:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
-    return cv2.adaptiveThreshold(image, max_value, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    # Apply adaptive thresholding
+    thresholded = cv2.adaptiveThreshold(image, max_value, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    
+    # Apply mask if provided
+    if mask is not None:
+        thresholded = np.where(mask, thresholded, image)
+    
+    return thresholded
 
 
 # Difference of Gaussians (DoG)
@@ -152,20 +181,24 @@ def difference_of_gaussians(image, sigma1=1, sigma2=2):
     return cv2.normalize(dog, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
 
-def inverting_images(img):
+def inverting_images(img, mask: Optional[np.ndarray] = None) -> np.ndarray:
     """
     Invert the image.
 
     Args:
         img (np.ndarray): The image to invert.
+        mask (np.ndarray, optional): Boolean mask indicating the region to invert.
 
     Returns:
         np.ndarray: The inverted image.
     """
-    return np.abs(255 - img).astype(np.uint8)
+    inverted_img = np.abs(255 - img).astype(np.uint8)
+    if mask is not None:
+        inverted_img = np.where(mask, inverted_img, img)
+    return inverted_img
 
 
-def gamma_transform(image, gamma, c=1):
+def gamma_transform(image, gamma, c=1, mask: Optional[np.ndarray] = None) -> np.ndarray:
     """
     Apply power-law (gamma) transformation to the input image.
     
@@ -173,7 +206,7 @@ def gamma_transform(image, gamma, c=1):
         image (np.ndarray): Input grayscale image.
         gamma (float): The gamma value for the transformation.
         c (float, optional): Scaling constant. Defaults to 1.
-    
+        mask (np.ndarray, optional): Boolean mask indicating the region to apply the transformation.
     Returns:
         np.ndarray: Transformed image.
     """
@@ -185,11 +218,9 @@ def gamma_transform(image, gamma, c=1):
     
     # Rescale back to 0-255
     gamma_corrected = np.clip(gamma_corrected * 255, 0, 255).astype(np.uint8)
-    
+    if mask is not None:
+        gamma_corrected = np.where(mask, gamma_corrected, image)
     return gamma_corrected
-
-
-
 
 
 def histogram_equalization(image):
@@ -202,7 +233,7 @@ def histogram_equalization(image):
     Returns:
     - Contrast-enhanced image (numpy array).
     """
-    return cv2.equalizeHist(image)
+    return cv2.equalizeHist(src=image)
 
 
 

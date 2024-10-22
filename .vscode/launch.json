@@ -59,8 +59,10 @@
             "console": "integratedTerminal",
             "args": [
                 "--img_dir",            "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Frames",
-                "--save_dir",           "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}New_preprocessing",
-                "--max_images",         "5",
+                "--save_dir",           "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Masked_frames",
+                "--max_images",         "None",
+                "--do_preprocessing",   "true",
+                "--build_video",        "true",
             ]
         },
 
