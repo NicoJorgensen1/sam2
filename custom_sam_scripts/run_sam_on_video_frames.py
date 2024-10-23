@@ -22,9 +22,9 @@ def run_sam_on_video_frames(
     model_size: str,
     model_weights_dir: str,
     config_dir: str,
-    points: List[np.ndarray],
-    neg_points: List[np.ndarray],
-    bboxes: List[np.ndarray],
+    points: Optional[List[np.ndarray]] = None,
+    neg_points: Optional[List[np.ndarray]] = None,
+    bboxes: Optional[List[np.ndarray]] = None,
     save_dir: Optional[Union[str, Path]] = None,
     **kwargs,
 ) -> Dict[int, Dict[int, np.ndarray]]:
@@ -40,10 +40,10 @@ def run_sam_on_video_frames(
         model_size (str): Size of the SAM2 model (e.g., "large", "base").
         model_weights_dir (str): Directory containing SAM2 model weights.
         config_dir (str): Directory containing SAM2 model configuration files.
-        points (List[np.ndarray]): List of arrays of points to add to the first frame, shape (N, 2).
-        neg_points (List[np.ndarray]): List of arrays of negative points to add to the first frame, shape (N, 2).
-        bboxes (List[np.ndarray]): List of arrays of bounding boxes to add to the first frame, shape (N, 4).
-        save_dir (Optional[Union[str, Path]], optional): Directory to save results. Defaults to None.
+        points (Optional[List[np.ndarray]]): List of arrays of points to add to the first frame, shape (N, 2). Defaults to None.
+        neg_points (Optional[List[np.ndarray]]): List of arrays of negative points to add to the first frame, shape (N, 2). Defaults to None.
+        bboxes (Optional[List[np.ndarray]]): List of arrays of bounding boxes to add to the first frame, shape (N, 4). Defaults to None.
+        save_dir (Optional[Union[str, Path]]): Directory to save results. Defaults to None.
         **kwargs: Additional keyword arguments.
 
     Returns:
@@ -114,31 +114,31 @@ if __name__ == "__main__":
     parser.add_argument("--model_size", type=str, default="large", help="Model size to use for SAM2")
     parser.add_argument("--model_weights_dir", type=str, default=relevant_dirs.get("model_weights_dir", os.getenv("MODEL_WEIGHTS_DIR", "checkpoints")), help="Path to the model weights directory")
     parser.add_argument("--config_dir", type=str, default=os.path.join(os.getcwd(), "sam2", "configs"), help="Path to the model config directory")
-    parser.add_argument("--points", type=str, default="300 900", help="List of points in 'x,y' format")
-    parser.add_argument("--neg_points", type=str, default=None, help="List of negative points in 'x,y' format")
-    parser.add_argument("--bboxes", type=str, default=None, help="List of bboxes in 'x1,y1,x2,y2' format")
+    # parser.add_argument("--points", type=str, default="300 900", help="List of points in 'x,y' format")
+    # parser.add_argument("--neg_points", type=str, default=None, help="List of negative points in 'x,y' format")
+    # parser.add_argument("--bboxes", type=str, default=None, help="List of bboxes in 'x1,y1,x2,y2' format")
     parser.add_argument("--save_dir", type=str, default=None, help="Path to the save directory")
     args = parser.parse_args()
 
     # Edit the input args 
     args.save_dir = None if "none" in str(args.save_dir).lower() else args.save_dir
 
-    # Process user-provided points and bboxes
-    if "none" not in str(args.points).lower():
-        args.points = args.points.split(",")
-        args.points = np.asarray([extract_numbers_from_string(inp_string=p, return_all=True, dtype=int) for p in args.points])
-    else:
-        args.points = None
-    if "none" not in str(args.neg_points).lower():
-        args.neg_points = args.neg_points.split(",")
-        args.neg_points = np.asarray([extract_numbers_from_string(inp_string=p, return_all=True, dtype=int) for p in args.neg_points])
-    else:
-        args.neg_points = None
-    if "none" not in str(args.bboxes).lower():
-        args.bboxes = args.bboxes.split(",")
-        args.bboxes = np.asarray([extract_numbers_from_string(inp_string=b, return_all=True, dtype=int) for b in args.bboxes])
-    else:
-        args.bboxes = None
+    # # Process user-provided points and bboxes
+    # if "none" not in str(args.points).lower():
+    #     args.points = args.points.split(",")
+    #     args.points = np.asarray([extract_numbers_from_string(inp_string=p, return_all=True, dtype=int) for p in args.points])
+    # else:
+    #     args.points = None
+    # if "none" not in str(args.neg_points).lower():
+    #     args.neg_points = args.neg_points.split(",")
+    #     args.neg_points = np.asarray([extract_numbers_from_string(inp_string=p, return_all=True, dtype=int) for p in args.neg_points])
+    # else:
+    #     args.neg_points = None
+    # if "none" not in str(args.bboxes).lower():
+    #     args.bboxes = args.bboxes.split(",")
+    #     args.bboxes = np.asarray([extract_numbers_from_string(inp_string=b, return_all=True, dtype=int) for b in args.bboxes])
+    # else:
+    #     args.bboxes = None
 
     # Print the arguments
     print_args(args=args, init_str="This is the arguments when running SAM2 on a video")
