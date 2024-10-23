@@ -43,7 +43,8 @@ RUN apt-get -y update \
         libavcodec-dev \
         libavformat-dev \
         libswscale-dev \
-        python3-tk
+        python3-tk \
+        x11-apps
 
 ### Install aws client 
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
