@@ -7,11 +7,14 @@ from AITrainingSharedLibrary.setup_logger_func import setup_logger
 from custom_sam_scripts.utils.get_sam_for_video_inference import get_sam_for_video_inference
 from custom_sam_scripts.utils.save_sam2_masks import save_results
 from custom_sam_scripts.add_points_or_bboxes_to_frame import add_points_and_bboxes
+from custom_sam_scripts.drawing_utils.add_interactive_frame import interactive_frame_annotation
 from typing import List, Optional, Union, Dict
 from pathlib import Path
 import numpy as np
 import argparse
 import os
+import cv2
+
 relevant_dirs = add_dirs_to_path()
 
 
@@ -83,6 +86,17 @@ def run_sam_on_video_frames(
     sam2.reset_state(inference_state)
     logger.info("Initialized inference state")
 
+    # Visualize the first frame and get user annotations
+    first_frame = cv2.imread(str(frame_df['img_path'][0]), cv2.IMREAD_GRAYSCALE)
+    user_points, user_neg_points, user_bboxes = interactive_frame_annotation(first_frame)
+    
+    # Extend the provided points, neg_points, and bboxes if they are not None
+    points = np.concatenate([points, user_points], axis=0) if points is not None else user_points
+    neg_points = np.concatenate([neg_points, user_neg_points], axis=0) if neg_points is not None else user_neg_points
+    bboxes = np.concatenate([bboxes, user_bboxes], axis=0) if bboxes is not None else user_bboxes
+    
+    logger.info(f"Total points: {len(points)} positive, {len(neg_points)} negative, and {len(bboxes)} bounding boxes")
+
     # Add points and bboxes to the frame
     inference_state, out_mask_logits = add_points_and_bboxes(sam2, inference_state, points, bboxes, neg_points, frame_idx=0)
 
@@ -114,37 +128,16 @@ if __name__ == "__main__":
     parser.add_argument("--model_size", type=str, default="large", help="Model size to use for SAM2")
     parser.add_argument("--model_weights_dir", type=str, default=relevant_dirs.get("model_weights_dir", os.getenv("MODEL_WEIGHTS_DIR", "checkpoints")), help="Path to the model weights directory")
     parser.add_argument("--config_dir", type=str, default=os.path.join(os.getcwd(), "sam2", "configs"), help="Path to the model config directory")
-    # parser.add_argument("--points", type=str, default="300 900", help="List of points in 'x,y' format")
-    # parser.add_argument("--neg_points", type=str, default=None, help="List of negative points in 'x,y' format")
-    # parser.add_argument("--bboxes", type=str, default=None, help="List of bboxes in 'x1,y1,x2,y2' format")
     parser.add_argument("--save_dir", type=str, default=None, help="Path to the save directory")
     args = parser.parse_args()
 
     # Edit the input args 
     args.save_dir = None if "none" in str(args.save_dir).lower() else args.save_dir
 
-    # # Process user-provided points and bboxes
-    # if "none" not in str(args.points).lower():
-    #     args.points = args.points.split(",")
-    #     args.points = np.asarray([extract_numbers_from_string(inp_string=p, return_all=True, dtype=int) for p in args.points])
-    # else:
-    #     args.points = None
-    # if "none" not in str(args.neg_points).lower():
-    #     args.neg_points = args.neg_points.split(",")
-    #     args.neg_points = np.asarray([extract_numbers_from_string(inp_string=p, return_all=True, dtype=int) for p in args.neg_points])
-    # else:
-    #     args.neg_points = None
-    # if "none" not in str(args.bboxes).lower():
-    #     args.bboxes = args.bboxes.split(",")
-    #     args.bboxes = np.asarray([extract_numbers_from_string(inp_string=b, return_all=True, dtype=int) for b in args.bboxes])
-    # else:
-    #     args.bboxes = None
-
     # Print the arguments
     print_args(args=args, init_str="This is the arguments when running SAM2 on a video")
 
     # Run the script
     video_segments = run_sam_on_video_frames(**vars(args))
-
 
 
