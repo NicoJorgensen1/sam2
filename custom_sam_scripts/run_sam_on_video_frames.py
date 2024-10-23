@@ -86,7 +86,7 @@ def run_sam_on_video_frames(
     # Add points and bboxes to the frame
     inference_state, out_mask_logits = add_points_and_bboxes(sam2, inference_state, points, bboxes, neg_points, frame_idx=0)
 
-    # Propagate the masks across the video
+    # Propagate the masks across the video on the rest of the frames
     video_segments = {}
     if out_mask_logits:
         logger.info("Propagating masks across video")

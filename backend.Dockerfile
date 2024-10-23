@@ -52,6 +52,11 @@ ADD https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.
 
 WORKDIR ${APP_ROOT}/server
 
+# Install GIC shared library - which includes all standard functions 
+RUN python -m pip install pip -U
+ADD "http://envision:Envision1234@192.168.19.36:8666/packages/" cache
+RUN python -m pip install --extra-index-url http://envision:Envision1234@192.168.19.36:8666 CameraAISharedLibrary InfluxClient AWSSecretsHelper AITrainingSharedLibrary --trusted-host 192.168.19.36
+
 # https://pythonspeed.com/articles/gunicorn-in-docker/
 CMD gunicorn --worker-tmp-dir /dev/shm \
     --worker-class gthread app:app \
