@@ -26,9 +26,9 @@ def divide_by_initial_frame(new_frame: np.ndarray, initial_frame: np.ndarray, ma
         initial_frame (np.ndarray): The initial frame to divide by.
         mask (np.ndarray, optional): If applied, only consider pixels where mask is True.
     Returns:
-        np.ndarray: The result of dividing the new frame by the initial frame, scaled to 0-255 range.
+        np.ndarray: The result of dividing the new frame by the initial frame
     """
-    division_result = (new_frame.astype(np.float32) / (initial_frame.astype(np.float32) + 1e-6)) * 255
+    division_result = (new_frame.astype(np.float32) / (initial_frame.astype(np.float32) + 1e-6)) 
     if mask is not None:
         division_result = np.where(mask, division_result, new_frame)
     return division_result
@@ -87,7 +87,7 @@ def scale_image(img, mask: Optional[np.ndarray] = None) -> np.ndarray:
         np.ndarray: The scaled image.
     """
     if mask is None:
-        return cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
+        mask = np.ones_like(img, dtype=bool)
     
     # Create a copy of the input image
     result = img.copy()
@@ -104,7 +104,7 @@ def scale_image(img, mask: Optional[np.ndarray] = None) -> np.ndarray:
         # If all pixels have the same value, set them to 128 (middle of 0-255 range)
         result[mask] = 128
     
-    return result
+    return result.astype(np.uint8)
 
 
 # Fourier Transform to Enhance Low-Frequency Changes
@@ -181,7 +181,10 @@ def difference_of_gaussians(image, sigma1=1, sigma2=2):
     return cv2.normalize(dog, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
 
-def inverting_images(img, mask: Optional[np.ndarray] = None) -> np.ndarray:
+def invert_image(
+        img: np.ndarray,
+        mask: Optional[np.ndarray] = None,
+    ) -> np.ndarray:
     """
     Invert the image.
 

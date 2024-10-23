@@ -37,6 +37,20 @@
             ]
         },
 
+        {
+            "name": "Jens Test Division",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}preprocessing${pathSeparator}Jens_test_division.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--img1_path",  "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}image_1.jpeg",
+                "--img2_path",  "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}image_2.jpeg",
+                "--save_dir",   "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Division_results",
+                "--show_plot",  "true"
+            ]
+        },
+
 
         {
             "name": "CLAHE preprocessing",
@@ -52,31 +66,19 @@
         },
 
         {
-            "name": "New Preprocessing",
+            "name": "Divide Preprocessing",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}preprocessing${pathSeparator}divide_processing.py",
             "console": "integratedTerminal",
             "args": [
-                "--img_dir",            "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Frames",
-                "--save_dir",           "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Masked_frames",
-                "--max_images",         "None",
-                "--do_preprocessing",   "true",
-                "--build_video",        "true",
-            ]
-        },
-
-        {
-            "name": "Jens Test Division",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}${pathSeparator}custom_sam_scripts${pathSeparator}preprocessing${pathSeparator}Jens_test_division.py",
-            "console": "integratedTerminal",
-            "args": [
-                "--img1_path",  "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}image_1.jpeg",
-                "--img2_path",  "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}image_2.jpeg",
-                "--save_dir",   "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Division_results",
-                "--show_plot",  "true"
+                "--img_dir",                    "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}Frames",
+                "--save_dir",                   "${env:IMAGE_DATASETS}${pathSeparator}InfuSight${pathSeparator}ENCXYN${pathSeparator}SHL01${pathSeparator}New_preprocessed_inverted_frames_2",
+                "--max_images",                 "none",
+                "--do_preprocessing",           "true",
+                "--threshold_preprocessing",    "true",
+                "--plot_blended_frame",         "false",
+                "--build_video",                "true",
             ]
         },
     ]

@@ -21,6 +21,12 @@ def plot_and_save_images(
     save_path (str): File path to save the output plot.
     show_plot (bool): Whether to show the plot.
     """
+    # Assure the inputs are nested lists 
+    if not isinstance(images[0], list):
+        images = [images]
+    if not isinstance(titles[0], list):
+        titles = [titles]
+
     # Create a subplot with the same dimensions as the nested images list
     nrows = len(images)
     ncols = len(images[0])
