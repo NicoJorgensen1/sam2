@@ -1,7 +1,4 @@
-21-Oct-2024 12:11:04 - INFO:  Starting SAM2 video segmentation
-21-Oct-2024 12:11:05 - INFO:  Processed 10 frames
-21-Oct-2024 12:11:07 - INFO:  Initialized SAM2 model with size large
-21-Oct-2024 12:11:07 - INFO:  Initialized inference state
-21-Oct-2024 12:11:07 - INFO:  Propagating masks across video
-21-Oct-2024 12:11:08 - INFO:  Processed 10 frames
-21-Oct-2024 12:11:12 - INFO:  SAM2 video segmentation completed
+24-Oct-2024 12:55:26 - INFO:  Starting SAM2 video segmentation
+24-Oct-2024 12:55:26 - INFO:  Processed 9 frames
+24-Oct-2024 12:55:28 - INFO:  Initialized SAM2 model with size large
+24-Oct-2024 12:55:29 - INFO:  Initialized inference state
