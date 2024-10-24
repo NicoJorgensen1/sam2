@@ -44,7 +44,10 @@ RUN apt-get -y update \
         libavformat-dev \
         libswscale-dev \
         python3-tk \
-        x11-apps
+        x11-apps \
+        libgl1-mesa-glx \
+        libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
 
 ### Install aws client 
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \

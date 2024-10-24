@@ -6,31 +6,30 @@
     // Sets the run context .
     "context": "../..",
 
-    // // Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+    // Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
     "dockerFile": "Dockerfile",
-    // Add a volume to the docker container that can be reached from within the container when running through vscode 
-    // I have no idea what the bind type or the consistency means. But spaces are NOT allowed between the keywords 
-    // The username is also specified in the Dockerfile. If changed, make sure it is changed both places!
-    // By using this localEnv it is possible to use the same path on both the local computer and the server, just remember to add export IMAGE_DATASET=/path/to/dataset in the corresponding ~/.bashrc file!
-     "mounts": [
-       "source=${localEnv:IMAGE_DATASETS},target=/Image_Datasets,type=bind,consistency=cached",             // Mount the image datasets
-       "source=${localEnv:MODEL_WEIGHTS_DIR},target=/Model_Weights,type=bind,consistency=cached",           // Mount the model weights
-       "source=/home/${localEnv:USER}/.aws,target=/workspace/.aws,type=bind,consistency=cached",            // Mount the aws credentials
-       "source=/home/${localEnv:USER}/.ssh,target=/home/EnvisionUser/.ssh,type=bind,consistency=cached"     // Mount the ssh credentials
+    
+    // By using this localEnv it is possible to use the same path on both the local computer and the server,
+    // just remember to add export IMAGE_DATASET=/path/to/dataset in the corresponding ~/.bashrc file!
+    "mounts": [
+       "source=${localEnv:IMAGE_DATASETS},target=/Image_Datasets,type=bind,consistency=cached",                         // Mount the image datasets
+       "source=${localEnv:MODEL_WEIGHTS_DIR},target=/Model_Weights,type=bind,consistency=cached",                       // Mount the model weights
+       "source=/home/${localEnv:USER}/.aws,target=/workspace/.aws,type=bind,consistency=cached",                        // Mount the aws credentials
+       "source=/home/${localEnv:USER}/.ssh,target=/home/EnvisionUser/.ssh,type=bind,consistency=cached",                // Mount the ssh credentials
+       "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",                                      // Mount the X11 socket
+       "source=/home/${localEnv:USER}/.Xauthority,target=/home/EnvisionUser/.Xauthority,type=bind,consistency=cached"   // Mount the Xauthority file
      ],
     
     // Add the IDs of extensions you want installed when the container is created.
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-python.python",                                 // Python extension
-                "ms-python.debugpy",                                // Debugpy extension --> allows for debugging python code 
-                "ms-azuretools.vscode-docker",                      // Docker extension
-                "yy0931.save-as-root",                              // Capability of "save as root", which might be usefull when editing source code for debugging purposes
-                "eamodio.gitlens",                                  // GitLens extension ID used for GitLens, which is git on steroids 
-                "GitHub.copilot",                                   // The github copilot extension 
-                "sourcery.sourcery",                                // Sourcery extension
-                "ms-python.autopep8"                                // Autopep8 extension --> automatically formats python code to PEP8 format on_save 
+                "ms-python.python",                 // Python extension
+                "ms-python.debugpy",                // Debugpy extension --> allows for debugging python code 
+                "ms-azuretools.vscode-docker",      // Docker extension
+                "yy0931.save-as-root",              // Capability of "save as root", which might be usefull when editing source code for debugging purposes
+                "eamodio.gitlens",                  // GitLens extension ID used for GitLens, which is git on steroids 
+                "sourcery.sourcery"                 // Sourcery extension
             ],
             "settings": [
                 "terminal.integrated.shell.linux", "/bin/bash"      // Let bash be the default shell inside the container 
@@ -40,10 +39,7 @@
     
     // The arguments to initiate the container with.
     "runArgs": [
-        "-v", "/tmp/.X11-unix:/tmp/.X11-unix",      // Mount the X11 socket
-        "-e", "DISPLAY=${localEnv:DISPLAY}",        // Set the DISPLAY variable
         "--privileged",                             // This is necessary in order for the container to be able to reach the inserted USB accelerator 
-        "-v", "/dev/bus/usb:/dev/bus/usb",          // Providing access to the usb interface 
         "--network", "host",                        // Use the same network as the host 
         "--gpus", "all",                            // Use all available GPUs
         "--shm-size", "6224G",                      // Increase the shared memory size to 1T 
@@ -53,7 +49,6 @@
         "--memory-swap", "6284G"                    // As the swap includes both the memory+swap, here we add an additional 40G for the swap memory 
     ],
 
-    
     // Assure we will always start in the /workspace/SAM2 directory 
     "workspaceMount": "source=${localWorkspaceFolder}/,target=/workspace/SAM2,type=bind,consistency=cached",
     "workspaceFolder": "/workspace/SAM2",
@@ -61,11 +56,12 @@
     // Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
     "remoteUser": "EnvisionUser",
     "remoteEnv": {
+        "DISPLAY": "${localEnv:DISPLAY}",
         "IMAGE_DATASETS": "/Image_Datasets",
         "MODEL_WEIGHTS_DIR": "/Model_Weights",
         "WANDB_API_KEY": "e7220eb15a89a255ac255d759c7089d1d1b88577",
-        "PYTHONPATH": "${PYTHONPATH}:/workspace/SAM2",
+        "PYTHONPATH": "/workspace/SAM2",
         "AWS_CONFIG_FILE": "/workspace/.aws/config",
-        "AWS_SHARED_CREDENTIALS_FILE": "/workspace/.aws/credentials"
-    } 
+        "AWS_SHARED_CREDENTIALS_FILE": "/workspace/.aws/credentials",
+    }
 }
