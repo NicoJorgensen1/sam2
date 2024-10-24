@@ -8,6 +8,7 @@ from custom_sam_scripts.utils.get_sam_for_video_inference import get_sam_for_vid
 from custom_sam_scripts.utils.save_sam2_masks import save_results
 from custom_sam_scripts.add_points_or_bboxes_to_frame import add_points_and_bboxes
 from custom_sam_scripts.drawing_utils.add_interactive_frame import interactive_frame_annotation
+from custom_sam_scripts.utils.sam2_utils.video_masklets_propagation import video_propagation
 from typing import List, Optional, Union, Dict
 from pathlib import Path
 import numpy as np
