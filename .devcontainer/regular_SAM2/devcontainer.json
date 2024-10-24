@@ -40,16 +40,17 @@
     
     // The arguments to initiate the container with.
     "runArgs": [
-        "-v", "/tmp/.X11-unix:/tmp/.X11-unix", "-e", "DISPLAY=${localEnv:DISPLAY}",  // Mount the display in the container (i.e. enable usage of the screen monitors from inside the container) 
-        "--privileged",                                                     // This is necessary in order for the container to be able to reach the inserted USB accelerator 
-        "-v", "/dev/bus/usb:/dev/bus/usb",                                  // Providing access to the usb interface 
-        "--network", "host",                                                // Use the same network as the host 
-        "--gpus", "all",                                                    // Use all available GPUs
-        "--shm-size", "6224G",                                              // Increase the shared memory size to 1T 
-        "--ulimit", "memlock=-1",                                           // Remove the memory lock limit 
-        "--ulimit", "stack=1073741824",                                     // Increase the stack size to 1024 MB 
-        "--memory", "6224G",                                                // Allocates 1T of memory to your container
-        "--memory-swap", "6284G"                                            // As the swap includes both the memory+swap, here we add an additional 40G for the swap memory 
+        "-v", "/tmp/.X11-unix:/tmp/.X11-unix",      // Mount the X11 socket
+        "-e", "DISPLAY=${localEnv:DISPLAY}",        // Set the DISPLAY variable
+        "--privileged",                             // This is necessary in order for the container to be able to reach the inserted USB accelerator 
+        "-v", "/dev/bus/usb:/dev/bus/usb",          // Providing access to the usb interface 
+        "--network", "host",                        // Use the same network as the host 
+        "--gpus", "all",                            // Use all available GPUs
+        "--shm-size", "6224G",                      // Increase the shared memory size to 1T 
+        "--ulimit", "memlock=-1",                   // Remove the memory lock limit 
+        "--ulimit", "stack=1073741824",             // Increase the stack size to 1024 MB 
+        "--memory", "6224G",                        // Allocates 1T of memory to your container
+        "--memory-swap", "6284G"                    // As the swap includes both the memory+swap, here we add an additional 40G for the swap memory 
     ],
 
     
