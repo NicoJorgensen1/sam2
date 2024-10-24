@@ -4,7 +4,7 @@ from CameraAISharedLibrary.extract_numbers_from_string import extract_numbers_fr
 from CameraAISharedLibrary.apply_mold_masking import apply_masking
 from AITrainingSharedLibrary.mil_create_pl_dataframe import create_pl_df
 from AITrainingSharedLibrary.get_relevant_dirs import add_dirs_to_path
-from custom_sam_scripts.utils.preprocessing_methods import (
+from custom_sam_scripts.utils.general_utils.preprocessing_methods import (
     apply_clahe,
     divide_by_initial_frame,
     subtract_initial_frame,

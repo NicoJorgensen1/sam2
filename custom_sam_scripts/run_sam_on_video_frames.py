@@ -101,13 +101,7 @@ def run_sam_on_video_frames(
     inference_state, out_mask_logits = add_points_and_bboxes(sam2, inference_state, points, bboxes, neg_points, frame_idx=0)
 
     # Propagate the masks across the video on the rest of the frames
-    video_segments = {}
-    if out_mask_logits:
-        logger.info("Propagating masks across video")
-        video_segments = {out_frame_idx: {out_obj_id: (out_mask_logits[i] > 0.0).cpu().numpy() for i, out_obj_id in enumerate(out_obj_ids)} 
-                                for out_frame_idx, out_obj_ids, out_mask_logits in sam2.propagate_in_video(inference_state)}
-    logger.info(f"Processed {len(video_segments)} frames")
-
+    video_segments = video_propagation(sam2, inference_state, logger)
 
     # Save the results
     if save_dir is not None and video_segments:
@@ -139,5 +133,3 @@ if __name__ == "__main__":
 
     # Run the script
     video_segments = run_sam_on_video_frames(**vars(args))
-
-

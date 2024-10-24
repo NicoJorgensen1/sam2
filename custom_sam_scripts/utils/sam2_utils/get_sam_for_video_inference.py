@@ -1,6 +1,6 @@
 from AITrainingSharedLibrary.get_relevant_dirs import add_dirs_to_path
-from custom_sam_scripts.utils.get_device_to_use import get_device
-from custom_sam_scripts.utils.get_sam_checkpoint_and_config import get_sam_checkpoint_and_config
+from custom_sam_scripts.utils.general_utils.get_device_to_use import get_device
+from custom_sam_scripts.utils.sam2_utils.get_sam_checkpoint_and_config import get_sam_checkpoint_and_config
 from typing import Union, Any
 from sam2.automatic_mask_generator import SAM2AutomaticMaskGenerator
 from sam2.build_sam import build_sam2_video_predictor

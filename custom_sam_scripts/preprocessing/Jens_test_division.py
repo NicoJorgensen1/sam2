@@ -2,7 +2,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 from CameraAISharedLibrary.print_args_func import print_args
 from CameraAISharedLibrary.str2bool_func import str2bool
-from custom_sam_scripts.utils.plot_save_images import plot_and_save_images
+from custom_sam_scripts.utils.drawing_utils.plot_save_images import plot_and_save_images
 import cv2
 import numpy as np
 import argparse
