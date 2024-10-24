@@ -40,7 +40,7 @@
     
     // The arguments to initiate the container with.
     "runArgs": [
-        "-v", "/tmp/.X11-unix:/tmp/.X11-unix", "-e", "DISPLAY=${DISPLAY}",  // Mount the display in the container (i.e. enable usage of the screen monitors from inside the container) 
+        "-v", "/tmp/.X11-unix:/tmp/.X11-unix", "-e", "DISPLAY=${localEnv:DISPLAY}",  // Mount the display in the container (i.e. enable usage of the screen monitors from inside the container) 
         "--privileged",                                                     // This is necessary in order for the container to be able to reach the inserted USB accelerator 
         "-v", "/dev/bus/usb:/dev/bus/usb",                                  // Providing access to the usb interface 
         "--network", "host",                                                // Use the same network as the host 
